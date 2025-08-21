@@ -1,0 +1,10 @@
+﻿<UserControl x:Class="NarativeNodeGraph.Views.NodeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:behaviors="clr-namespace:NarativeNodeGraph.ViewModels.Commands"
+             Width="100" Height="60"
+             behaviors:DragBehavior.DragCommand ="{Binding DragCommand}">
+    <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" CornerRadius="6">
+        <TextBlock Text="{Binding Title}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Border>
+</UserControl>
