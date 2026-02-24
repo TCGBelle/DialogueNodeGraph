@@ -13,7 +13,6 @@ namespace NarativeNodeGraph.Models
     }
     public class PortModel
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = "";
         public PortType Type { get; set; }
     }

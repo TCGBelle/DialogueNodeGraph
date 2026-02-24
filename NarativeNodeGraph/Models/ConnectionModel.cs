@@ -8,7 +8,7 @@ namespace NarativeNodeGraph.Models
 {
     public class ConnectionModel
     {
-        public Guid ForwardPortID { get; set; }
-        public Guid BackwardPortID { get; set; }
+        public PortModel From { get; set; } = null!;
+        public PortModel To { get; set; } = null!;
     }
 }

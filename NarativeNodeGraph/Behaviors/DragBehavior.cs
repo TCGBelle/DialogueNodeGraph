@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Input;
 
-namespace NarativeNodeGraph.ViewModels.Commands
+namespace NarativeNodeGraph.Behaviors
 {
     public static class DragBehavior
     {
@@ -46,17 +47,29 @@ namespace NarativeNodeGraph.ViewModels.Commands
 
         private static void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            // Walk up from the original source until we reach the element with Tag="Port" (if any)
+            DependencyObject? current = e.OriginalSource as DependencyObject;
+            while (current != null)
+            {
+                if (current is FrameworkElement fe && (fe.Tag as string) == "Port")
+                    return;
+
+                current = VisualTreeHelper.GetParent(current);
+            }
+
             if (sender is UIElement element)
             {
                 _start = e.GetPosition(null);
                 _currentElement = element;
                 _isDragging = true;
                 element.CaptureMouse();
+                e.Handled = true; // good practice so node drag doesn't bubble weirdly
             }
         }
 
         private static void OnMouseMove(object sender, MouseEventArgs e)
         {
+
             if (_isDragging && _currentElement != null && GetDragCommand(_currentElement) is ICommand cmd)
             {
                 var position = e.GetPosition(null);

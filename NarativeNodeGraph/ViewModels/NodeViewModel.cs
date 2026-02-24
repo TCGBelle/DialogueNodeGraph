@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
+using System.Collections.ObjectModel;
 
 namespace NarativeNodeGraph.ViewModels
 {
@@ -20,15 +21,20 @@ namespace NarativeNodeGraph.ViewModels
 
         [ObservableProperty]
         private string title;
+        public double NodeWidth => 100;
 
+        public ObservableCollection<PortViewModel> Ports { get; } = new();
         public IRelayCommand<(double X, double Y)> DragCommand { get; }
-        public NodeViewModel(NodeModel model)
+
+        public GraphViewModel ParentGraph { get; set; }
+        public NodeViewModel(NodeModel model, GraphViewModel parentGraph)
         {
             x = model.X;
             y = model.Y;
             title = model.Title;
 
             DragCommand = new RelayCommand<(double X, double Y)>(OnDrag);
+            ParentGraph = parentGraph;
         }
 
         private void OnDrag((double X, double Y) delta)

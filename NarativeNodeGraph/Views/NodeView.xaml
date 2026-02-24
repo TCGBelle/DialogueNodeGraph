@@ -1,10 +1,123 @@
 ﻿<UserControl x:Class="NarativeNodeGraph.Views.NodeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:behaviors="clr-namespace:NarativeNodeGraph.ViewModels.Commands"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:conv="clr-namespace:NarativeNodeGraph.Converters"
+             xmlns:behaviors="clr-namespace:NarativeNodeGraph.Behaviors"
              Width="100" Height="60"
              behaviors:DragBehavior.DragCommand ="{Binding DragCommand}">
+    <UserControl.Resources>
+        <conv:PortTypeToVisibilityConverter x:Key="PortTypeToVisibilityConverter"/>
+        <Style x:Key="PortEllipseStyle" TargetType="Ellipse">
+
+            <!-- Default -->
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Fill" Value="#FFB347"/>
+            <!-- orange -->
+            <Setter Property="Stroke" Value="Black"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="0" ShadowDepth="0"/>
+                </Setter.Value>
+            </Setter>
+
+            <!-- Hover -->
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+
+                    <Setter Property="Fill" Value="#FFD580"/>
+                    <Setter Property="Stroke" Value="White"/>
+                    <Setter Property="StrokeThickness" Value="2"/>
+
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect
+                        Color="#FFFFAA"
+                        BlurRadius="12"
+                        ShadowDepth="0"
+                        Opacity="0.9"/>
+                        </Setter.Value>
+                    </Setter>
+
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+                        </Setter.Value>
+                    </Setter>
+
+                </Trigger>
+            </Style.Triggers>
+
+        </Style>
+    </UserControl.Resources>
     <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" CornerRadius="6">
-        <TextBlock Text="{Binding Title}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Grid Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- INPUT PORTS (LEFT) -->
+            <ItemsControl Grid.Column="0"
+                  ItemsSource="{Binding Ports}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <StackPanel Visibility="{Binding Type,
+                                Converter={StaticResource PortTypeToVisibilityConverter},
+                                ConverterParameter=Input}">
+                                <Ellipse Style="{StaticResource PortEllipseStyle}"
+                                    Tag="Port">
+
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:PortConnectionBehavior
+                                            BeginCommand="{Binding BeginConnectionCommand}"
+                                            EndCommand="{Binding EndConnectionCommand}" />
+                                    </i:Interaction.Behaviors>
+
+                                </Ellipse>
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- TITLE -->
+            <TextBlock Grid.Column="1"
+               Text="{Binding Title}"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Top"
+               Margin="10"/>
+
+            <!-- OUTPUT PORTS (RIGHT) -->
+            <ItemsControl Grid.Column="2"
+                  ItemsSource="{Binding Ports}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel HorizontalAlignment="Right">
+                            <StackPanel Visibility="{Binding Type,
+                                Converter={StaticResource PortTypeToVisibilityConverter},
+                                ConverterParameter=Output}">
+                                <Ellipse Style="{StaticResource PortEllipseStyle}"
+                                Tag="Port">
+
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:PortConnectionBehavior
+                                            BeginCommand="{Binding BeginConnectionCommand}"
+                                            EndCommand="{Binding EndConnectionCommand}" />
+                                    </i:Interaction.Behaviors>
+
+                                </Ellipse>
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
     </Border>
 </UserControl>
