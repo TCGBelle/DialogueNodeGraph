@@ -8,51 +8,6 @@
              behaviors:DragBehavior.DragCommand ="{Binding DragCommand}">
     <UserControl.Resources>
         <conv:PortTypeToVisibilityConverter x:Key="PortTypeToVisibilityConverter"/>
-        <Style x:Key="PortEllipseStyle" TargetType="Ellipse">
-
-            <!-- Default -->
-            <Setter Property="Width" Value="12"/>
-            <Setter Property="Height" Value="12"/>
-            <Setter Property="Fill" Value="#FFB347"/>
-            <!-- orange -->
-            <Setter Property="Stroke" Value="Black"/>
-            <Setter Property="StrokeThickness" Value="1"/>
-            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
-
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="0" ShadowDepth="0"/>
-                </Setter.Value>
-            </Setter>
-
-            <!-- Hover -->
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-
-                    <Setter Property="Fill" Value="#FFD580"/>
-                    <Setter Property="Stroke" Value="White"/>
-                    <Setter Property="StrokeThickness" Value="2"/>
-
-                    <Setter Property="Effect">
-                        <Setter.Value>
-                            <DropShadowEffect
-                        Color="#FFFFAA"
-                        BlurRadius="12"
-                        ShadowDepth="0"
-                        Opacity="0.9"/>
-                        </Setter.Value>
-                    </Setter>
-
-                    <Setter Property="RenderTransform">
-                        <Setter.Value>
-                            <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
-                        </Setter.Value>
-                    </Setter>
-
-                </Trigger>
-            </Style.Triggers>
-
-        </Style>
     </UserControl.Resources>
     <Border BorderBrush="Black" BorderThickness="2" Background="LightGray" CornerRadius="6">
         <Grid Margin="5">

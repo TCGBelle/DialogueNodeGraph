@@ -8,30 +8,6 @@
              xmlns:behaviors="clr-namespace:NarativeNodeGraph.Behaviors"
              x:Name="graphRoot" av:DesignHeight="2.766" av:DesignWidth="6.156">
     <UserControl.Resources>
-        <Style x:Key="ConnectionPathStyle" TargetType="Path">
-            <Setter Property="Stroke" Value="White"/>
-            <Setter Property="StrokeThickness" Value="2"/>
-            <Setter Property="Fill" Value="Transparent"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="0" ShadowDepth="0" Opacity="0"/>
-                </Setter.Value>
-            </Setter>
-
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="StrokeThickness" Value="3"/>
-                    <Setter Property="Effect">
-                        <Setter.Value>
-                            <DropShadowEffect Color="White"
-                                          BlurRadius="14"
-                                          ShadowDepth="0"
-                                          Opacity="0.9"/>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
     </UserControl.Resources>
     <Canvas Background="#1e1e1e">
         <i:Interaction.Behaviors>

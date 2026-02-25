@@ -11,8 +11,18 @@ using System.Collections.ObjectModel;
 
 namespace NarativeNodeGraph.ViewModels
 {
+    public enum NodeKind
+    {
+        Start,
+        End,
+        NpcDialogue,
+        Answer,
+        PlayerDialogue
+    }
     public partial class NodeViewModel : ObservableObject
     {
+        public Guid Id { get; } = Guid.NewGuid();
+        //public abstract NodeKind Kind { get; }
         [ObservableProperty]
         private double x;
 

@@ -62,7 +62,7 @@ public partial class GraphViewModel : ObservableObject
     {
         System.Diagnostics.Debug.WriteLine("StartConnection fired");
         CancelPreview();
-
+        Mouse.OverrideCursor = Cursors.Cross;
         _activePort = port;
 
         _previewConnection = new ConnectionViewModel(port, null, DeleteConnectionCommand)
@@ -138,7 +138,7 @@ public partial class GraphViewModel : ObservableObject
     {
         if (_previewConnection != null)
             Connections.Remove(_previewConnection);
-
+        Mouse.OverrideCursor = null;
         _previewConnection = null;
     }
 
