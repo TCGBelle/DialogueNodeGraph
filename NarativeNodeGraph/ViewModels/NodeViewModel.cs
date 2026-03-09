@@ -40,6 +40,8 @@ namespace NarativeNodeGraph.ViewModels
         public IRelayCommand<(double X, double Y)> DragCommand { get; }
 
         public GraphViewModel ParentGraph { get; set; }
+
+        public virtual string? BodyText => null;
         public NodeViewModel(NodeModel model, GraphViewModel parentGraph)
         {
             x = model.X;

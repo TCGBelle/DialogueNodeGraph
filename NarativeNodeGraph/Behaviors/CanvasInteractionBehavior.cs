@@ -17,6 +17,8 @@ namespace NarativeNodeGraph.Behaviors
 
         public static readonly DependencyProperty MouseUpCommandProperty =
             DependencyProperty.Register(nameof(MouseUpCommand), typeof(ICommand), typeof(CanvasInteractionBehavior));
+        public static readonly DependencyProperty RightClickCommandProperty =
+            DependencyProperty.Register(nameof(RightClickCommand), typeof(ICommand), typeof(CanvasInteractionBehavior));
 
         public ICommand? MouseMoveCommand
         {
@@ -29,6 +31,11 @@ namespace NarativeNodeGraph.Behaviors
             get => (ICommand?)GetValue(MouseUpCommandProperty);
             set => SetValue(MouseUpCommandProperty, value);
         }
+        public ICommand? RightClickCommand
+        {
+            get => (ICommand?)GetValue(RightClickCommandProperty);
+            set => SetValue(RightClickCommandProperty, value);
+        }
 
         protected override void OnAttached()
         {
@@ -38,6 +45,7 @@ namespace NarativeNodeGraph.Behaviors
             InputManager.Current.PreProcessInput += OnPreProcessInput;
 
             AssociatedObject.MouseLeftButtonUp += OnMouseUp;
+            AssociatedObject.PreviewMouseRightButtonDown += OnMouseRightButtonDown;
         }
 
         protected override void OnDetaching()
@@ -45,7 +53,7 @@ namespace NarativeNodeGraph.Behaviors
             InputManager.Current.PreProcessInput -= OnPreProcessInput;
 
             AssociatedObject.MouseLeftButtonUp -= OnMouseUp;
-
+            AssociatedObject.PreviewMouseRightButtonDown -= OnMouseRightButtonDown;
             base.OnDetaching();
         }
 
@@ -79,6 +87,13 @@ namespace NarativeNodeGraph.Behaviors
 
             if (MouseUpCommand?.CanExecute(null) == true)
                 MouseUpCommand.Execute(null);
+        }
+        private void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var position = e.GetPosition(AssociatedObject);
+            System.Diagnostics.Debug.WriteLine($"Right click at: {position}");
+            if (RightClickCommand?.CanExecute(position) == true)
+                RightClickCommand.Execute(position);
         }
     }
 }

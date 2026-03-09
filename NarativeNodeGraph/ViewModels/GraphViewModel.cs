@@ -12,11 +12,15 @@ public partial class GraphViewModel : ObservableObject
     public ObservableCollection<NodeViewModel> Nodes { get; } = new();
     public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
 
-    private PortViewModel? _activePort;
-    private ConnectionViewModel? _previewConnection;
+    private PortViewModel? activePort;
+    private ConnectionViewModel? previewConnection;
+    private Point lastContextMenuPosition;
+
     public ICommand MouseMoveOnCanvasCommand { get; }
     public IRelayCommand CanvasMouseUpCommand { get; }
     public IRelayCommand<ConnectionViewModel> DeleteConnectionCommand { get; }
+    public IRelayCommand<NodeKind> AddNodeCommand { get; }
+    public IRelayCommand<Point> CanvasRightClickCommand { get; }
 
     public GraphViewModel()
     {
@@ -26,6 +30,16 @@ public partial class GraphViewModel : ObservableObject
 
         Nodes.Add(startNode);
         Nodes.Add(endNode);
+        CanvasRightClickCommand = new RelayCommand<Point>(p =>
+        {
+            System.Diagnostics.Debug.WriteLine($"Stored menu position: {p}");
+            lastContextMenuPosition = p;
+        });
+        AddNodeCommand = new RelayCommand<NodeKind>(kind =>
+        {
+            var node = CreateNodeOfType(kind, lastContextMenuPosition.X, lastContextMenuPosition.Y);
+            Nodes.Add(node);
+        });
         MouseMoveOnCanvasCommand = new RelayCommand<Point>(p =>
         {
             System.Diagnostics.Debug.WriteLine("Mouse move: " + p);
@@ -74,7 +88,7 @@ public partial class GraphViewModel : ObservableObject
         };
     }
 
-    public bool IsConnecting => _activePort != null;
+    public bool IsConnecting => activePort != null;
 
     /// <summary>
     /// Called when user presses mouse on a port.
@@ -85,14 +99,14 @@ public partial class GraphViewModel : ObservableObject
         System.Diagnostics.Debug.WriteLine("StartConnection fired");
         CancelPreview();
         Mouse.OverrideCursor = Cursors.Cross;
-        _activePort = port;
+        activePort = port;
 
-        _previewConnection = new ConnectionViewModel(port, null, DeleteConnectionCommand)
+        previewConnection = new ConnectionViewModel(port, null, DeleteConnectionCommand)
         {
             OverrideEndPoint = GetPortPoint(port) // start at the port
         };
 
-        Connections.Add(_previewConnection);
+        Connections.Add(previewConnection);
         OnPropertyChanged(nameof(IsConnecting));
     }
 
@@ -102,11 +116,11 @@ public partial class GraphViewModel : ObservableObject
     public void UpdatePreviewEndPoint(Point mouseCanvasPoint)
     {
         System.Diagnostics.Debug.WriteLine("UpdatePreviewEndPoint: " + mouseCanvasPoint);
-        if (_previewConnection == null)
+        if (previewConnection == null)
             return;
 
-        _previewConnection.OverrideEndPoint = mouseCanvasPoint;
-        _previewConnection.RaiseGeometryChanged();
+        previewConnection.OverrideEndPoint = mouseCanvasPoint;
+        previewConnection.RaiseGeometryChanged();
     }
 
     /// <summary>
@@ -114,36 +128,65 @@ public partial class GraphViewModel : ObservableObject
     /// </summary>
     public void CompleteConnection(PortViewModel targetPort)
     {
-        if (_activePort == null)
+        if (activePort == null)
             return;
 
         // Remove preview line first
         CancelPreview();
 
         // Don’t connect to itself
-        if (ReferenceEquals(_activePort, targetPort))
+        if (ReferenceEquals(activePort, targetPort))
         {
-            _activePort = null;
+            activePort = null;
             OnPropertyChanged(nameof(IsConnecting));
             return;
         }
 
         // Must be Input<->Output
-        if (_activePort.Type == targetPort.Type)
+        if (activePort.Type == targetPort.Type)
         {
-            _activePort = null;
+            activePort = null;
             OnPropertyChanged(nameof(IsConnecting));
             return;
         }
 
         // Normalize direction: From = Output, To = Input
-        var from = _activePort.Type == PortType.Output ? _activePort : targetPort;
-        var to = _activePort.Type == PortType.Output ? targetPort : _activePort;
+        var from = activePort.Type == PortType.Output ? activePort : targetPort;
+        var to = activePort.Type == PortType.Output ? targetPort : activePort;
+
+        if (!CanConnect(from, to))
+        {
+            activePort = null;
+            OnPropertyChanged(nameof(IsConnecting));
+            return;
+        }
 
         Connections.Add(new ConnectionViewModel(from, to, DeleteConnectionCommand));
 
-        _activePort = null;
+        activePort = null;
         OnPropertyChanged(nameof(IsConnecting));
+    }
+
+    private bool CanConnect(PortViewModel from, PortViewModel to)
+    {
+        if (from.Type != PortType.Output || to.Type != PortType.Input)
+            return false;
+
+        var fromKind = from.ParentNode.Kind;
+        var toKind = to.ParentNode.Kind;
+
+        // Any node can connect to End
+        if (toKind == NodeKind.End)
+            return true;
+
+        return fromKind switch
+        {
+            NodeKind.Start => toKind == NodeKind.NpcDialogue,
+            NodeKind.NpcDialogue => toKind == NodeKind.Answer,
+            NodeKind.Answer => toKind == NodeKind.PlayerDialogue,
+            NodeKind.PlayerDialogue => toKind == NodeKind.NpcDialogue,
+            _ => false
+        };
     }
 
     /// <summary>
@@ -152,16 +195,16 @@ public partial class GraphViewModel : ObservableObject
     public void CancelConnection()
     {
         CancelPreview();
-        _activePort = null;
+        activePort = null;
         OnPropertyChanged(nameof(IsConnecting));
     }
 
     private void CancelPreview()
     {
-        if (_previewConnection != null)
-            Connections.Remove(_previewConnection);
+        if (previewConnection != null)
+            Connections.Remove(previewConnection);
         Mouse.OverrideCursor = null;
-        _previewConnection = null;
+        previewConnection = null;
     }
 
     public Point GetPortPoint(PortViewModel port)
@@ -176,6 +219,11 @@ public partial class GraphViewModel : ObservableObject
             : 0;
 
         return new Point(node.X + offsetX, node.Y + offsetY);
+    }
+
+    public void SetContextMenuPosition(Point position)
+    {
+        lastContextMenuPosition = position;
     }
 }
 

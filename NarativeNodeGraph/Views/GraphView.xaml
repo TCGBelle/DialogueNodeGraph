@@ -3,17 +3,48 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:NarativeNodeGraph.Views"
              xmlns:vm="clr-namespace:NarativeNodeGraph.ViewModels"
-             xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="NarativeNodeGraph.Views.GraphView"
+             xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="av"
+             x:Class="NarativeNodeGraph.Views.GraphView"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:NarativeNodeGraph.Behaviors"
-             x:Name="graphRoot" av:DesignHeight="2.766" av:DesignWidth="6.156">
+             x:Name="graphRoot"
+             av:DesignHeight="2.766"
+             av:DesignWidth="6.156">
     <UserControl.Resources>
     </UserControl.Resources>
     <Canvas Background="#1e1e1e">
+        <Canvas.ContextMenu>
+            <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                <MenuItem Header="Add Start Node"
+                  Command="{Binding AddNodeCommand}"
+                  CommandParameter="{x:Static vm:NodeKind.Start}" />
+
+                <MenuItem Header="Add End Node"
+                  Command="{Binding AddNodeCommand}"
+                  CommandParameter="{x:Static vm:NodeKind.End}" />
+
+                <Separator />
+
+                <MenuItem Header="Add NPC Dialogue Node"
+                  Command="{Binding AddNodeCommand}"
+                  CommandParameter="{x:Static vm:NodeKind.NpcDialogue}" />
+
+                <MenuItem Header="Add Answer Node"
+                  Command="{Binding AddNodeCommand}"
+                  CommandParameter="{x:Static vm:NodeKind.Answer}" />
+
+                <MenuItem Header="Add Player Dialogue Node"
+                  Command="{Binding AddNodeCommand}"
+                  CommandParameter="{x:Static vm:NodeKind.PlayerDialogue}" />
+            </ContextMenu>
+        </Canvas.ContextMenu>
         <i:Interaction.Behaviors>
             <behaviors:CanvasInteractionBehavior
         MouseMoveCommand="{Binding MouseMoveOnCanvasCommand}"
-        MouseUpCommand="{Binding CanvasMouseUpCommand}" />
+        MouseUpCommand="{Binding CanvasMouseUpCommand}"
+        RightClickCommand="{Binding CanvasRightClickCommand}" />
         </i:Interaction.Behaviors>
         <ItemsControl ItemsSource="{Binding Connections}">
             <ItemsControl.ItemsPanel>

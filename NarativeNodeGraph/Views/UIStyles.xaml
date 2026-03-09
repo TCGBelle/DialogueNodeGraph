@@ -70,4 +70,38 @@
         </Style.Triggers>
 
     </Style>
+    <Style x:Key="NodeBorderStyle" TargetType="Border">
+        <Setter Property="BorderBrush" Value="Black"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="Background" Value="LightGray"/>
+        <Setter Property="CornerRadius" Value="6"/>
+
+        <Style.Triggers>
+
+            <DataTrigger Binding="{Binding Kind}" Value="Start">
+                <Setter Property="BorderBrush" Value="DarkGreen"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding Kind}" Value="End">
+                <Setter Property="BorderBrush" Value="DarkRed"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding Kind}" Value="NpcDialogue">
+                <Setter Property="BorderBrush" Value="DarkBlue"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding Kind}" Value="Answer">
+                <Setter Property="BorderBrush" Value="Goldenrod"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding Kind}" Value="PlayerDialogue">
+                <Setter Property="BorderBrush" Value="Purple"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="BorderThickness" Value="3"/>
+            </DataTrigger>
+
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>
