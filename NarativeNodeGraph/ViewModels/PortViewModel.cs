@@ -14,6 +14,7 @@ namespace NarativeNodeGraph.ViewModels
 {
     public partial class PortViewModel : ObservableObject
     {
+        public Guid Id { get; }
         public NodeViewModel ParentNode { get; }
         
         [ObservableProperty]
@@ -21,13 +22,18 @@ namespace NarativeNodeGraph.ViewModels
 
         [ObservableProperty]
         private PortType type;
+
+        [ObservableProperty] private string label = "";
+
+        [ObservableProperty] private bool isHighlighted;
         public ICommand BeginConnectionCommand { get; }
         public ICommand EndConnectionCommand { get; }
-        public PortViewModel(NodeViewModel parent, PortModel model)
+        public PortViewModel(NodeViewModel parent, PortModel model, Guid id)
         {
             ParentNode = parent;
             Name = model.Name;
             Type = model.Type;
+            Id = id;
             BeginConnectionCommand = new RelayCommand(BeginConnection);
             EndConnectionCommand = new RelayCommand(EndConnection);
         }

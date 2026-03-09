@@ -20,19 +20,12 @@ public partial class GraphViewModel : ObservableObject
 
     public GraphViewModel()
     {
-        // Sample graph
-        var node1 = new NodeViewModel(new NodeModel { X = 100, Y = 100, Title = "Node 1" }, this);
-        var node2 = new NodeViewModel(new NodeModel { X = 400, Y = 200, Title = "Node 2" }, this);
 
-        var port1Out = new PortViewModel(node1, new PortModel { Name = "Out", Type = PortType.Output });
-        var port2In = new PortViewModel(node2, new PortModel { Name = "In", Type = PortType.Input });
+        var startNode = CreateNodeOfType(NodeKind.Start, 100, 100);
+        var endNode = CreateNodeOfType(NodeKind.End, 400, 200);
 
-        node1.Ports.Add(port1Out);
-        node2.Ports.Add(port2In);
-
-        Nodes.Add(node1);
-        Nodes.Add(node2);
-
+        Nodes.Add(startNode);
+        Nodes.Add(endNode);
         MouseMoveOnCanvasCommand = new RelayCommand<Point>(p =>
         {
             System.Diagnostics.Debug.WriteLine("Mouse move: " + p);
@@ -50,6 +43,35 @@ public partial class GraphViewModel : ObservableObject
             if (c != null)
                 Connections.Remove(c);
         });
+    }
+
+    private NodeViewModel CreateNodeOfType(NodeKind kind, double x, double y)
+    {
+        var model = new NodeModel
+        {
+            Id = Guid.NewGuid(),
+            X = x,
+            Y = y,
+            Title = kind switch
+            {
+                NodeKind.Start => "Start",
+                NodeKind.End => "End",
+                NodeKind.NpcDialogue => "NPC Dialogue",
+                NodeKind.Answer => "Answer",
+                NodeKind.PlayerDialogue => "Player Dialogue",
+                _ => "Node"
+            }
+        };
+
+        return kind switch
+        {
+            NodeKind.Start => new StartNodeViewModel(model, this),
+            NodeKind.End => new EndNodeViewModel(model, this),
+            NodeKind.NpcDialogue => new NpcDialogueNodeViewModel(model, this),
+            NodeKind.Answer => new AnswerNodeViewModel(model, this),
+            NodeKind.PlayerDialogue => new PlayerDialogueNodeViewModel(model, this),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+        };
     }
 
     public bool IsConnecting => _activePort != null;
@@ -142,24 +164,15 @@ public partial class GraphViewModel : ObservableObject
         _previewConnection = null;
     }
 
-    // Keep this in ONE place so you don’t duplicate geometry math.
-    // This should match your NodeView layout (width/port spacing).
     public Point GetPortPoint(PortViewModel port)
     {
         var node = port.ParentNode;
-
-        // If you layout ports in two columns (input left, output right),
-        // the vertical index should be among same-side ports.
         int indexSameSide = node.Ports.Count(p => p.Type == port.Type && !ReferenceEquals(p, port));
-        // indexSameSide above is "count before this one" (stable even if duplicates)
-        // If you prefer:
-        // var same = node.Ports.Where(p => p.Type == port.Type).ToList();
-        // int indexSameSide = same.IndexOf(port);
 
         double offsetY = 30 + (indexSameSide * 18) + 6;
 
         double offsetX = port.Type == PortType.Output
-            ? node.NodeWidth   // see note below
+            ? node.NodeWidth
             : 0;
 
         return new Point(node.X + offsetX, node.Y + offsetY);
