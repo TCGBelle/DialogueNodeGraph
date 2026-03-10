@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NarativeNodeGraph.Models;
+using NarativeNodeGraph.Services;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace NarativeNodeGraph.ViewModels;
 
@@ -15,16 +18,36 @@ public partial class GraphViewModel : ObservableObject
     private PortViewModel? activePort;
     private ConnectionViewModel? previewConnection;
     private Point lastContextMenuPosition;
+    private readonly GraphSerializationMapper _mapper = new();
+    private readonly GraphJsonFileService _fileService = new();
+    private readonly IFileDialogService fileDialogService;
+    [ObservableProperty]
+    private bool isDirty = false;
+    [ObservableProperty]
+    private string? currentFilePath;
+    public string DisplayTitle
+    {
+        get
+        {
+            var fileName = string.IsNullOrWhiteSpace(CurrentFilePath)
+                ? "Untitled"
+                : System.IO.Path.GetFileNameWithoutExtension(CurrentFilePath);
 
+            return IsDirty ? $"{fileName} *" : fileName;
+        }
+    }
     public ICommand MouseMoveOnCanvasCommand { get; }
     public IRelayCommand CanvasMouseUpCommand { get; }
     public IRelayCommand<ConnectionViewModel> DeleteConnectionCommand { get; }
     public IRelayCommand<NodeKind> AddNodeCommand { get; }
+    public IRelayCommand<NodeViewModel> DeleteNodeCommand { get; }
     public IRelayCommand<Point> CanvasRightClickCommand { get; }
+    public IRelayCommand SaveCommand { get; }
+    public IRelayCommand LoadCommand { get; }
 
-    public GraphViewModel()
+    public GraphViewModel(IFileDialogService _fileDialogService)
     {
-
+        fileDialogService = _fileDialogService ?? throw new ArgumentNullException(nameof(_fileDialogService));
         var startNode = CreateNodeOfType(NodeKind.Start, 100, 100);
         var endNode = CreateNodeOfType(NodeKind.End, 400, 200);
 
@@ -56,7 +79,13 @@ public partial class GraphViewModel : ObservableObject
         {
             if (c != null)
                 Connections.Remove(c);
+            IsDirty = true;
+            OnPropertyChanged(nameof(DisplayTitle));
         });
+        DeleteNodeCommand = new RelayCommand<NodeViewModel>(DeleteNode);
+
+        SaveCommand = new AsyncRelayCommand(SaveAsync);
+        LoadCommand = new AsyncRelayCommand(LoadAsync);
     }
 
     private NodeViewModel CreateNodeOfType(NodeKind kind, double x, double y)
@@ -76,7 +105,8 @@ public partial class GraphViewModel : ObservableObject
                 _ => "Node"
             }
         };
-
+        IsDirty = true;
+        OnPropertyChanged(nameof(DisplayTitle));
         return kind switch
         {
             NodeKind.Start => new StartNodeViewModel(model, this),
@@ -86,6 +116,7 @@ public partial class GraphViewModel : ObservableObject
             NodeKind.PlayerDialogue => new PlayerDialogueNodeViewModel(model, this),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
+        
     }
 
     public bool IsConnecting => activePort != null;
@@ -165,6 +196,8 @@ public partial class GraphViewModel : ObservableObject
 
         activePort = null;
         OnPropertyChanged(nameof(IsConnecting));
+        IsDirty = true;
+        OnPropertyChanged(nameof(DisplayTitle));
     }
 
     private bool CanConnect(PortViewModel from, PortViewModel to)
@@ -224,6 +257,105 @@ public partial class GraphViewModel : ObservableObject
     public void SetContextMenuPosition(Point position)
     {
         lastContextMenuPosition = position;
+    }
+
+    public async Task SaveToFile(string path)
+    {
+        var dto = _mapper.ToDto(this);
+        await _fileService.SaveAsync(path, dto);
+    }
+
+    public async Task LoadFromFile(string path)
+    {
+        var dto = await _fileService.LoadAsync(path);
+
+        ClearGraph();
+
+        var result = _mapper.FromDto(dto, this);
+
+        foreach (var node in result.Nodes)
+            Nodes.Add(node);
+
+        foreach (var connection in result.Connections)
+            Connections.Add(connection);
+    }
+
+    private async Task SaveAsync()
+    {
+        var path = fileDialogService.ShowSaveFileDialog(
+            "JSON Graph (*.json)|*.json|All Files (*.*)|*.*",
+            ".json",
+            "graph.json");
+
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        var dto = _mapper.ToDto(this);
+        await _fileService.SaveAsync(path, dto);
+        CurrentFilePath = path;
+        IsDirty = false;
+        OnPropertyChanged(nameof(DisplayTitle));
+    }
+
+    private async Task LoadAsync()
+    {
+        var path = fileDialogService.ShowOpenFileDialog(
+            "JSON Graph (*.json)|*.json|All Files (*.*)|*.*",
+            ".json");
+
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        var dto = await _fileService.LoadAsync(path);
+
+        ClearGraph();
+
+        var result = _mapper.FromDto(dto, this);
+
+        foreach (var node in result.Nodes)
+            Nodes.Add(node);
+
+        foreach (var connection in result.Connections)
+            Connections.Add(connection);
+        CurrentFilePath = path;
+        IsDirty = false;
+        OnPropertyChanged(nameof(DisplayTitle));
+    }
+
+    private void ClearGraph()
+    {
+        CancelConnection();
+        Connections.Clear();
+        Nodes.Clear();
+    }
+
+    private void DeleteNode(NodeViewModel? node)
+    {
+        if (node is null)
+            return;
+
+        CancelConnection();
+
+        var connectionsToRemove = Connections
+            .Where(c => c.From.ParentNode == node || c.To?.ParentNode == node)
+            .ToList();
+
+        foreach (var connection in connectionsToRemove)
+            Connections.Remove(connection);
+
+        Nodes.Remove(node);
+        IsDirty = true;
+        OnPropertyChanged(nameof(DisplayTitle));
+    }
+
+    partial void OnIsDirtyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(DisplayTitle));
+    }
+
+    partial void OnCurrentFilePathChanged(string? value)
+    {
+        OnPropertyChanged(nameof(DisplayTitle));
     }
 }
 

@@ -14,7 +14,20 @@
              av:DesignWidth="6.156">
     <UserControl.Resources>
     </UserControl.Resources>
-    <Canvas Background="#1e1e1e">
+    <Grid>
+        <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="10"
+                Panel.ZIndex="1000">
+            <Button Content="Save"
+                Command="{Binding SaveCommand}"
+                Margin="0,0,8,0"/>
+
+            <Button Content="Load"
+                Command="{Binding LoadCommand}"/>
+        </StackPanel>
+        <Canvas Background="#1e1e1e">
         <Canvas.ContextMenu>
             <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                 <MenuItem Header="Add Start Node"
@@ -63,8 +76,6 @@
                       CommandParameter="{Binding}" />
                             </ContextMenu>
                         </Path.ContextMenu>
-
-
                         <Path.Data>
                             <PathGeometry>
                                 <PathFigure StartPoint="{Binding StartPoint}">
@@ -97,4 +108,5 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
     </Canvas>
+    </Grid>
 </UserControl>

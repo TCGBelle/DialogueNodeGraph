@@ -13,12 +13,24 @@ namespace NarativeNodeGraph.ViewModels
 
         public PortViewModel Out { get; }
 
+        public StartNodeViewModel(GraphViewModel parentGraph)
+    : base(parentGraph)
+        {
+            Title = "Start";
+            Out = AddPort(PortType.Output, "Out");
+        }
+
         public StartNodeViewModel(NodeModel model, GraphViewModel parentGraph)
+            : this(model, parentGraph, null)
+        {
+        }
+
+        public StartNodeViewModel(NodeModel model, GraphViewModel parentGraph, Guid? outPortId)
             : base(model, parentGraph)
         {
             Title = string.IsNullOrWhiteSpace(Title) ? "Start" : Title;
-
-            Out = AddPort(PortType.Output, "Out");
+            Out = AddPort(PortType.Output, "Out", outPortId);
         }
     }
 }
+

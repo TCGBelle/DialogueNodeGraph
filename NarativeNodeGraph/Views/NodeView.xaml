@@ -11,6 +11,15 @@
         <conv:PortTypeToVisibilityConverter x:Key="PortTypeToVisibilityConverter"/>
     </UserControl.Resources>
     <Border Style="{StaticResource NodeBorderStyle}">
+        <Border.ContextMenu>
+            <ContextMenu
+            DataContext="{Binding PlacementTarget.DataContext.ParentGraph, RelativeSource={RelativeSource Self}}">
+                <MenuItem Header="Delete"
+                      Command="{Binding DeleteNodeCommand}"
+                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+            </ContextMenu>
+        </Border.ContextMenu>
+
         <Grid Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>

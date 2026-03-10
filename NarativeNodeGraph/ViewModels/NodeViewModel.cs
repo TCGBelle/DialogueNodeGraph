@@ -42,6 +42,11 @@ namespace NarativeNodeGraph.ViewModels
         public GraphViewModel ParentGraph { get; set; }
 
         public virtual string? BodyText => null;
+        protected NodeViewModel(GraphViewModel parentGraph)
+        {
+            ParentGraph = parentGraph ?? throw new ArgumentNullException(nameof(parentGraph));
+            DragCommand = new RelayCommand<(double X, double Y)>(OnDrag);
+        }
         public NodeViewModel(NodeModel model, GraphViewModel parentGraph)
         {
             x = model.X;
@@ -54,23 +59,25 @@ namespace NarativeNodeGraph.ViewModels
         }
         protected PortViewModel AddPort(PortType type, string? label = null, Guid? fixedId = null)
         {
-            PortModel model = new PortModel
-            {
-                Name = $"{type}Port{Ports.Count(p => p.Type == type)}",
-                Type = type
-            };
-            var port = new PortViewModel(this, model, fixedId ?? Guid.NewGuid())
-            {
-                Label = label ?? ""
-            };
+            var portName = type == PortType.Input ? "Input" : "Output";
+
+            var port = new PortViewModel(
+                this,
+                portName,
+                type,
+                label,
+                fixedId);
+
             Ports.Add(port);
             return port;
         }
 
         protected void RemovePort(PortViewModel port)
         {
-            Ports.Remove(port);
+            if (Ports.Contains(port))
+                Ports.Remove(port);
         }
+
 
         public IEnumerable<PortViewModel> InputPorts => Ports.Where(p => p.Type == PortType.Input);
         public IEnumerable<PortViewModel> OutputPorts => Ports.Where(p => p.Type == PortType.Output);

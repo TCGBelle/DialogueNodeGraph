@@ -28,12 +28,14 @@ namespace NarativeNodeGraph.ViewModels
         [ObservableProperty] private bool isHighlighted;
         public ICommand BeginConnectionCommand { get; }
         public ICommand EndConnectionCommand { get; }
-        public PortViewModel(NodeViewModel parent, PortModel model, Guid id)
+        public PortViewModel(NodeViewModel parentNode,string name,PortType type,string? label = null,Guid? fixedId = null)
         {
-            ParentNode = parent;
-            Name = model.Name;
-            Type = model.Type;
-            Id = id;
+            ParentNode = parentNode ?? throw new ArgumentNullException(nameof(parentNode));
+            Name = name;
+            Type = type;
+            Label = label ?? string.Empty;
+            Id = fixedId ?? Guid.NewGuid();
+
             BeginConnectionCommand = new RelayCommand(BeginConnection);
             EndConnectionCommand = new RelayCommand(EndConnection);
         }

@@ -19,13 +19,30 @@ namespace NarativeNodeGraph.ViewModels
 
         public PortViewModel Out { get; }
 
+        public NpcDialogueNodeViewModel(GraphViewModel parentGraph)
+           : base(parentGraph)
+        {
+            Title = "NPC Dialogue";
+            In = AddPort(PortType.Input, "In");
+            Out = AddPort(PortType.Output, "Out");
+        }
+
         public NpcDialogueNodeViewModel(NodeModel model, GraphViewModel parentGraph)
+            : this(model, parentGraph, null, null)
+        {
+        }
+
+        public NpcDialogueNodeViewModel(
+            NodeModel model,
+            GraphViewModel parentGraph,
+            Guid? inPortId,
+            Guid? outPortId)
             : base(model, parentGraph)
         {
             Title = string.IsNullOrWhiteSpace(Title) ? "NPC Dialogue" : Title;
 
-            In = AddPort(PortType.Input, "In");
-            Out = AddPort(PortType.Output, "Out");
+            In = AddPort(PortType.Input, "In", inPortId);
+            Out = AddPort(PortType.Output, "Out", outPortId);
         }
     }
 }

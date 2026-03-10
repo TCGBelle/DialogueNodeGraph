@@ -1,4 +1,5 @@
-﻿using NarativeNodeGraph.ViewModels;
+﻿using NarativeNodeGraph.Services;
+using NarativeNodeGraph.ViewModels;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,7 +21,7 @@ namespace NarativeNodeGraph
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new GraphViewModel();
+            DataContext = new GraphViewModel(new FileDialogService());
         }
     }
 }
