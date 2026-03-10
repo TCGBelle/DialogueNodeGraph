@@ -6,4 +6,13 @@
         Title="{Binding DisplayTitle}" 
         Width="800" Height="600">
     <views:GraphView DataContext="{Binding}" />
+    <Window.InputBindings>
+        <KeyBinding Key="S"
+                Modifiers="Control"
+                Command="{Binding SaveCommand}" />
+
+        <KeyBinding Key="O"
+                Modifiers="Control"
+                Command="{Binding LoadCommand}" />
+    </Window.InputBindings>
 </Window>

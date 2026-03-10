@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Style x:Key="ConnectionPathStyle" TargetType="Path">
         <Setter Property="Stroke" Value="White"/>
-        <Setter Property="StrokeThickness" Value="2"/>
+        <Setter Property="StrokeThickness" Value="4"/>
         <Setter Property="Fill" Value="Transparent"/>
         <Setter Property="Effect">
             <Setter.Value>
@@ -75,6 +75,14 @@
         <Setter Property="BorderThickness" Value="2"/>
         <Setter Property="Background" Value="LightGray"/>
         <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="20"
+                                  ShadowDepth="4"
+                                  Color="Black"
+                                  Opacity="0.7"/>
+            </Setter.Value>
+        </Setter>
 
         <Style.Triggers>
 
