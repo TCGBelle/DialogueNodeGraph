@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace NarativeNodeGraph.Behaviors
 {
@@ -51,8 +52,14 @@ namespace NarativeNodeGraph.Behaviors
             DependencyObject? current = e.OriginalSource as DependencyObject;
             while (current != null)
             {
-                if (current is FrameworkElement fe && (fe.Tag as string) == "Port")
-                    return;
+                if (current is FrameworkElement fe)
+                {
+                    if ((fe.Tag as string) == "Port")
+                        return;
+
+                    if (fe is Thumb)
+                        return;
+                }
 
                 current = VisualTreeHelper.GetParent(current);
             }

@@ -3,86 +3,168 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:conv="clr-namespace:NarativeNodeGraph.Converters"
-             xmlns:behaviors="clr-namespace:NarativeNodeGraph.Behaviors"
-             Width="{Binding NodeWidth}"
-             MinHeight="60"
-             behaviors:DragBehavior.DragCommand ="{Binding DragCommand}">
+             xmlns:behaviors="clr-namespace:NarativeNodeGraph.Behaviors">
     <UserControl.Resources>
         <conv:PortTypeToVisibilityConverter x:Key="PortTypeToVisibilityConverter"/>
     </UserControl.Resources>
-    <Border Style="{StaticResource NodeBorderStyle}">
-        <Border.ContextMenu>
-            <ContextMenu
+    <Grid Width="{Binding Width}"
+          Height="{Binding Height}">
+        <Border Style="{StaticResource NodeBorderStyle}"
+                behaviors:DragBehavior.DragCommand ="{Binding DragCommand}">
+            <Border.ContextMenu>
+                <ContextMenu
             DataContext="{Binding PlacementTarget.DataContext.ParentGraph, RelativeSource={RelativeSource Self}}">
-                <MenuItem Header="Delete"
+                    <MenuItem Header="Delete"
                       Command="{Binding DeleteNodeCommand}"
                       CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
-            </ContextMenu>
-        </Border.ContextMenu>
+                </ContextMenu>
+            </Border.ContextMenu>
 
-        <Grid Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- INPUT PORTS (LEFT) -->
-            <ItemsControl Grid.Column="0"
+                <!-- INPUT PORTS (LEFT) -->
+                <ItemsControl Grid.Column="0"
                   ItemsSource="{Binding Ports}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel>
-                            <StackPanel Visibility="{Binding Type,
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <StackPanel Visibility="{Binding Type,
                                 Converter={StaticResource PortTypeToVisibilityConverter},
                                 ConverterParameter=Input}">
-                                <Ellipse Style="{StaticResource PortEllipseStyle}"
+                                    <Ellipse Style="{StaticResource PortEllipseStyle}"
                                     Tag="Port">
 
-                                    <i:Interaction.Behaviors>
-                                        <behaviors:PortConnectionBehavior
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:PortConnectionBehavior
                                             BeginCommand="{Binding BeginConnectionCommand}"
                                             EndCommand="{Binding EndConnectionCommand}" />
-                                    </i:Interaction.Behaviors>
+                                        </i:Interaction.Behaviors>
 
-                                </Ellipse>
+                                    </Ellipse>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-            <!-- TITLE -->
-            <TextBlock Grid.Column="1"
+                <!-- TITLE -->
+                <TextBlock Grid.Column="1"
                Text="{Binding Title}"
                HorizontalAlignment="Center"
                VerticalAlignment="Top"
                Margin="10"/>
 
-            <!-- OUTPUT PORTS (RIGHT) -->
-            <ItemsControl Grid.Column="2"
+                <!-- OUTPUT PORTS (RIGHT) -->
+                <ItemsControl Grid.Column="2"
                   ItemsSource="{Binding Ports}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel HorizontalAlignment="Right">
-                            <StackPanel Visibility="{Binding Type,
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel HorizontalAlignment="Right">
+                                <StackPanel Visibility="{Binding Type,
                                 Converter={StaticResource PortTypeToVisibilityConverter},
                                 ConverterParameter=Output}">
-                                <Ellipse Style="{StaticResource PortEllipseStyle}"
+                                    <Ellipse Style="{StaticResource PortEllipseStyle}"
                                 Tag="Port">
 
-                                    <i:Interaction.Behaviors>
-                                        <behaviors:PortConnectionBehavior
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:PortConnectionBehavior
                                             BeginCommand="{Binding BeginConnectionCommand}"
                                             EndCommand="{Binding EndConnectionCommand}" />
-                                    </i:Interaction.Behaviors>
+                                        </i:Interaction.Behaviors>
 
-                                </Ellipse>
+                                    </Ellipse>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </Grid>
-    </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
+        <!-- Edge thumbs -->
+        <Thumb HorizontalAlignment="Left"
+           Width="6"
+           Cursor="SizeWE"
+           Opacity="0">
+            <i:Interaction.Behaviors>
+                <behaviors:NodeResizeBehavior Direction="Left" />
+            </i:Interaction.Behaviors>
+        </Thumb>
+
+        <Thumb HorizontalAlignment="Right"
+           Width="6"
+           Cursor="SizeWE"
+           Opacity="0">
+            <i:Interaction.Behaviors>
+                <behaviors:NodeResizeBehavior Direction="Right" />
+            </i:Interaction.Behaviors>
+        </Thumb>
+
+        <Thumb VerticalAlignment="Top"
+           Height="6"
+           Cursor="SizeNS"
+           Opacity="0">
+            <i:Interaction.Behaviors>
+                <behaviors:NodeResizeBehavior Direction="Top" />
+            </i:Interaction.Behaviors>
+        </Thumb>
+
+        <Thumb VerticalAlignment="Bottom"
+           Height="6"
+           Cursor="SizeNS"
+           Opacity="0">
+            <i:Interaction.Behaviors>
+                <behaviors:NodeResizeBehavior Direction="Bottom" />
+            </i:Interaction.Behaviors>
+        </Thumb>
+
+        <!-- Corner thumbs -->
+        <Thumb HorizontalAlignment="Left"
+           VerticalAlignment="Top"
+           Width="10"
+           Height="10"
+           Cursor="SizeNWSE"
+           Opacity="0">
+            <i:Interaction.Behaviors>
+                <behaviors:NodeResizeBehavior Direction="TopLeft" />
+            </i:Interaction.Behaviors>
+        </Thumb>
+
+        <Thumb HorizontalAlignment="Right"
+           VerticalAlignment="Top"
+           Width="10"
+           Height="10"
+           Cursor="SizeNESW"
+           Opacity="0">
+            <i:Interaction.Behaviors>
+                <behaviors:NodeResizeBehavior Direction="TopRight" />
+            </i:Interaction.Behaviors>
+        </Thumb>
+
+        <Thumb HorizontalAlignment="Left"
+           VerticalAlignment="Bottom"
+           Width="10"
+           Height="10"
+           Cursor="SizeNESW"
+           Opacity="0">
+            <i:Interaction.Behaviors>
+                <behaviors:NodeResizeBehavior Direction="BottomLeft" />
+            </i:Interaction.Behaviors>
+        </Thumb>
+
+        <Thumb HorizontalAlignment="Right"
+           VerticalAlignment="Bottom"
+           Width="10"
+           Height="10"
+           Cursor="SizeNWSE"
+           Opacity="0">
+            <i:Interaction.Behaviors>
+                <behaviors:NodeResizeBehavior Direction="BottomRight" />
+            </i:Interaction.Behaviors>
+        </Thumb>
+    </Grid>
 </UserControl>

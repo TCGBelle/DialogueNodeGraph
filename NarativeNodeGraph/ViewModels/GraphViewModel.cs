@@ -248,7 +248,7 @@ public partial class GraphViewModel : ObservableObject
         double offsetY = 30 + (indexSameSide * 18) + 6;
 
         double offsetX = port.Type == PortType.Output
-            ? node.NodeWidth
+            ? node.Width
             : 0;
 
         return new Point(node.X + offsetX, node.Y + offsetY);

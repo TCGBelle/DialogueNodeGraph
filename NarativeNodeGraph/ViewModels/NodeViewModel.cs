@@ -34,7 +34,14 @@ namespace NarativeNodeGraph.ViewModels
 
         [ObservableProperty]
         private bool isSelected;
-        public double NodeWidth => 100;
+        [ObservableProperty]
+        private double width = 100;
+
+        [ObservableProperty]
+        private double height = 80;
+
+        public double MinWidth => 100;
+        public double MinHeight => 80;
 
         public ObservableCollection<PortViewModel> Ports { get; } = new();
         public IRelayCommand<(double X, double Y)> DragCommand { get; }
