@@ -134,7 +134,7 @@ public partial class GraphViewModel : ObservableObject
 
         previewConnection = new ConnectionViewModel(port, null, DeleteConnectionCommand)
         {
-            OverrideEndPoint = GetPortPoint(port) // start at the port
+            OverrideEndPoint = null
         };
 
         Connections.Add(previewConnection);

@@ -58,10 +58,15 @@ namespace NarativeNodeGraph.ViewModels
                 .Where(p => p.Type == port.Type)
                 .ToList();
 
-            int portIndex = sameSidePorts.IndexOf(port);
+            int portIndex = sameSidePorts
+            .OrderBy(p => p.Id)
+            .ToList()
+            .IndexOf(port);
 
             double offsetY = 12 + (portIndex * 22) + 5;
-            double offsetX = port.Type == PortType.Output ? 90 : 0;
+            double offsetX = port.Type == PortType.Output
+            ? node.Width
+            : 0;
 
             return new Point(node.X + offsetX,
                              node.Y + offsetY);
