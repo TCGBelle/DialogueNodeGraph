@@ -21,6 +21,10 @@
             </Border.ContextMenu>
 
             <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -53,12 +57,16 @@
                 </ItemsControl>
 
                 <!-- TITLE -->
-                <TextBlock Grid.Column="1"
-               Text="{Binding Title}"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Top"
-               Margin="10"/>
+                <TextBlock Grid.Row="0"
+                Grid.Column="1"
+                Text="{Binding Title}"
+                HorizontalAlignment="Center"
+                Margin="10"/>
 
+                <ContentPresenter Grid.Column="1"
+                  Grid.Row="1"
+                  Content="{Binding BodyContent}" />
+                
                 <!-- OUTPUT PORTS (RIGHT) -->
                 <ItemsControl Grid.Column="2"
                   ItemsSource="{Binding Ports}">

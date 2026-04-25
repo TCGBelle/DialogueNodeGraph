@@ -13,8 +13,8 @@ namespace NarativeNodeGraph.ViewModels
         public override NodeKind Kind => NodeKind.NpcDialogue;
 
         [ObservableProperty]
-        private string dialogueText = "";
-
+        private string dialogueText = "test";
+        public override object? BodyContent => DialogueText;
         public PortViewModel In { get; }
 
         public PortViewModel Out { get; }

@@ -48,7 +48,7 @@ namespace NarativeNodeGraph.ViewModels
 
         public GraphViewModel ParentGraph { get; set; }
 
-        public virtual string? BodyText => null;
+        public virtual object? BodyContent => null;
         protected NodeViewModel(GraphViewModel parentGraph)
         {
             ParentGraph = parentGraph ?? throw new ArgumentNullException(nameof(parentGraph));
