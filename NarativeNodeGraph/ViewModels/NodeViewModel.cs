@@ -35,10 +35,9 @@ namespace NarativeNodeGraph.ViewModels
         [ObservableProperty]
         private bool isSelected;
         [ObservableProperty]
-        private double width = 100;
-
+        private double width = double.NaN;
         [ObservableProperty]
-        private double height = 80;
+        private double height = double.NaN;
 
         public double MinWidth => 100;
         public double MinHeight => 80;
@@ -93,6 +92,12 @@ namespace NarativeNodeGraph.ViewModels
         {
             X += delta.X;
             Y += delta.Y;
+        }
+
+        public void SetSize(double width, double height)
+        {
+            Width = Math.Max(MinWidth, width);
+            Height = Math.Max(MinHeight, height);
         }
     }
 

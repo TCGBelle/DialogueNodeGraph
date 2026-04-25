@@ -7,10 +7,14 @@
     <UserControl.Resources>
         <conv:PortTypeToVisibilityConverter x:Key="PortTypeToVisibilityConverter"/>
     </UserControl.Resources>
-    <Grid Width="{Binding Width}"
-          Height="{Binding Height}">
+    <Grid>
+        <i:Interaction.Behaviors>
+        <behaviors:NodeAutoSizeBehavior/>
+        </i:Interaction.Behaviors>
         <Border Style="{StaticResource NodeBorderStyle}"
-                behaviors:DragBehavior.DragCommand ="{Binding DragCommand}">
+                behaviors:DragBehavior.DragCommand ="{Binding DragCommand}"
+                Width="{Binding Width}"
+                Height="{Binding Height}">
             <Border.ContextMenu>
                 <ContextMenu
             DataContext="{Binding PlacementTarget.DataContext.ParentGraph, RelativeSource={RelativeSource Self}}">
@@ -63,10 +67,10 @@
                 HorizontalAlignment="Center"
                 Margin="10"/>
 
-                <ContentPresenter Grid.Column="1"
-                  Grid.Row="1"
-                  Content="{Binding BodyContent}" />
-                
+                <ContentControl Grid.Row="1"
+                 Grid.Column="1"
+                 Content="{Binding}" />
+
                 <!-- OUTPUT PORTS (RIGHT) -->
                 <ItemsControl Grid.Column="2"
                   ItemsSource="{Binding Ports}">

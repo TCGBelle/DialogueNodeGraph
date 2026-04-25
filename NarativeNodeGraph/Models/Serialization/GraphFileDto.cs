@@ -26,6 +26,8 @@ namespace NarativeNodeGraph.Models.Serialization
         public string? DialogueText { get; set; }
         public string? AnswerText { get; set; }
 
+        public Dictionary<string, string> Data { get; set; } = new();
+
         public List<PortDto> Ports { get; set; } = new();
     }
 

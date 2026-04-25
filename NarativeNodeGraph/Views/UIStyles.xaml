@@ -112,4 +112,15 @@
 
         </Style.Triggers>
     </Style>
+    <Style TargetType="TextBox">
+        <Setter Property="Background" Value="#2D2D30"/>
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+        <Setter Property="BorderBrush" Value="#3E3E42"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="6"/>
+        <Setter Property="CaretBrush" Value="White"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="AcceptsReturn" Value="True"/>
+        <Setter Property="MaxWidth" Value="500"/>
+    </Style>
 </ResourceDictionary>

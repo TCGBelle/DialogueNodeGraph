@@ -1,0 +1,30 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="clr-namespace:NarativeNodeGraph.ViewModels">
+
+    <DataTemplate DataType="{x:Type vm:NpcDialogueNodeViewModel}">
+        <TextBox Text="{Binding DialogueText, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5"/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:PlayerDialogueNodeViewModel}">
+        <TextBox Text="{Binding DialogueText, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5"/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:AnswerNodeViewModel}">
+        <TextBox Text="{Binding AnswerText, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 Margin="5"/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:NodeViewModel}">
+        <Grid/>
+    </DataTemplate>
+</ResourceDictionary>
