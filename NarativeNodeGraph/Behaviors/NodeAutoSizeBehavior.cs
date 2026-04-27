@@ -6,37 +6,61 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace NarativeNodeGraph.Behaviors
 {
-    public class NodeAutoSizeBehavior : Behavior<FrameworkElement>
+    public sealed class NodeAutoSizeBehavior : Behavior<FrameworkElement>
     {
-        private bool _done;
+        private bool _hasAppliedAutoSize;
 
         protected override void OnAttached()
         {
             base.OnAttached();
-            AssociatedObject.LayoutUpdated += OnLayoutUpdated;
+            AssociatedObject.Loaded += OnLoaded;
         }
 
         protected override void OnDetaching()
         {
-            AssociatedObject.LayoutUpdated -= OnLayoutUpdated;
+            AssociatedObject.Loaded -= OnLoaded;
             base.OnDetaching();
         }
 
-        private void OnLayoutUpdated(object? sender, EventArgs e)
+        private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            if (_done) return;
+            if (_hasAppliedAutoSize)
+                return;
 
-            if (AssociatedObject.DataContext is NodeViewModel vm)
-            {
-                vm.SetSize(
-                    AssociatedObject.ActualWidth,
-                    AssociatedObject.ActualHeight);
+            AssociatedObject.Dispatcher.BeginInvoke(
+                ApplyAutoSize,
+                DispatcherPriority.Loaded);
+        }
 
-                _done = true;
-            }
+        private void ApplyAutoSize()
+        {
+            if (_hasAppliedAutoSize)
+                return;
+
+            if (AssociatedObject.DataContext is not NodeViewModel node)
+                return;
+
+            // Only autosize nodes that have not already been manually sized.
+            if (!double.IsNaN(node.Width) || !double.IsNaN(node.Height))
+                return;
+
+            AssociatedObject.UpdateLayout();
+
+            var measuredWidth = AssociatedObject.ActualWidth;
+            var measuredHeight = AssociatedObject.ActualHeight;
+
+            if (double.IsNaN(measuredWidth) ||
+                double.IsNaN(measuredHeight) ||
+                measuredWidth <= 0 ||
+                measuredHeight <= 0)
+                return;
+
+            node.SetSize(measuredWidth, measuredHeight);
+            _hasAppliedAutoSize = true;
         }
     }
 }
