@@ -52,6 +52,7 @@ namespace NarativeNodeGraph.ViewModels
         {
             ParentGraph = parentGraph ?? throw new ArgumentNullException(nameof(parentGraph));
             DragCommand = new RelayCommand<(double X, double Y)>(OnDrag);
+            Ports.CollectionChanged += (_, __) => OnPropertyChanged(nameof(Ports));
         }
         public NodeViewModel(NodeModel model, GraphViewModel parentGraph)
         {
@@ -62,6 +63,7 @@ namespace NarativeNodeGraph.ViewModels
 
             DragCommand = new RelayCommand<(double X, double Y)>(OnDrag);
             ParentGraph = parentGraph;
+            Ports.CollectionChanged += (_, __) => OnPropertyChanged(nameof(Ports));
         }
         protected PortViewModel AddPort(PortType type, string? label = null, Guid? fixedId = null)
         {
@@ -98,6 +100,11 @@ namespace NarativeNodeGraph.ViewModels
         {
             Width = Math.Max(MinWidth, width);
             Height = Math.Max(MinHeight, height);
+        }
+
+        public void RemovePortPublic(PortViewModel port)
+        {
+            RemovePort(port);
         }
     }
 

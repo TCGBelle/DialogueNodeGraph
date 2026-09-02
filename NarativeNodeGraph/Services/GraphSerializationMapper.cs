@@ -148,12 +148,20 @@ namespace NarativeNodeGraph.Services
         private static NpcDialogueNodeViewModel CreateNpcDialogueNode(NodeDto dto, NodeModel model, GraphViewModel parentGraph)
         {
             var inPortId = dto.Ports.FirstOrDefault(p => p.Type == nameof(PortType.Input))?.Id;
-            var outPortId = dto.Ports.FirstOrDefault(p => p.Type == nameof(PortType.Output))?.Id;
+            var outPortDto = dto.Ports.FirstOrDefault(p => p.Type == nameof(PortType.Output));
 
-            var node = new NpcDialogueNodeViewModel(model, parentGraph, inPortId, outPortId)
+            var node = new NpcDialogueNodeViewModel(model, parentGraph, inPortId, outPortDto?.Id)
             {
                 DialogueText = dto.DialogueText ?? string.Empty
             };
+
+            var extraOutputPorts = dto.Ports
+                .Where(p => p.Type == nameof(PortType.Output) && p.Id != outPortDto?.Id);
+
+            foreach (var portDto in extraOutputPorts)
+            {
+                node.AddLoadedOutput(portDto.Id, portDto.Label);
+            }
 
             return node;
         }

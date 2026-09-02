@@ -46,7 +46,7 @@
                                 ConverterParameter=Input}">
                                     <Ellipse Style="{StaticResource PortEllipseStyle}"
                                     Tag="Port">
-
+                                        
                                         <i:Interaction.Behaviors>
                                             <behaviors:PortConnectionBehavior
                                             BeginCommand="{Binding BeginConnectionCommand}"
@@ -73,7 +73,8 @@
 
                 <!-- OUTPUT PORTS (RIGHT) -->
                 <ItemsControl Grid.Column="2"
-                  ItemsSource="{Binding Ports}">
+                    Grid.RowSpan="2"
+                    ItemsSource="{Binding Ports}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel HorizontalAlignment="Right">
@@ -82,7 +83,12 @@
                                 ConverterParameter=Output}">
                                     <Ellipse Style="{StaticResource PortEllipseStyle}"
                                 Tag="Port">
-
+                                        <Ellipse.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="Delete Port"
+                                                          Command="{Binding DeleteCommand}"/>
+                                            </ContextMenu>
+                                        </Ellipse.ContextMenu>
                                         <i:Interaction.Behaviors>
                                             <behaviors:PortConnectionBehavior
                                             BeginCommand="{Binding BeginConnectionCommand}"

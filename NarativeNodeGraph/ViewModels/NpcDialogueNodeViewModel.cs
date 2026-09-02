@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NarativeNodeGraph.Models;
 using System;
 using System.Collections.Generic;
@@ -43,6 +44,19 @@ namespace NarativeNodeGraph.ViewModels
 
             In = AddPort(PortType.Input, "In", inPortId);
             Out = AddPort(PortType.Output, "Out", outPortId);
+        }
+
+        [RelayCommand]
+        private void AddOutput()
+        {
+            System.Diagnostics.Debug.WriteLine("AddOutput called");
+            int count = Ports.Count(p => p.Type == PortType.Output);
+            AddPort(PortType.Output, $"Option {count + 1}");
+        }
+
+        public void AddLoadedOutput(Guid id, string label)
+        {
+            AddPort(PortType.Output, label, id);
         }
     }
 }

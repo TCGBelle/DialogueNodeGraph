@@ -54,16 +54,12 @@ namespace NarativeNodeGraph.ViewModels
         {
             var node = port.ParentNode;
 
-            var sameSidePorts = node.Ports
+            int portIndex = node.Ports
                 .Where(p => p.Type == port.Type)
-                .ToList();
+                .ToList()
+                .IndexOf(port);
 
-            int portIndex = sameSidePorts
-            .OrderBy(p => p.Id)
-            .ToList()
-            .IndexOf(port);
-
-            double offsetY = 12 + (portIndex * 22) + 5;
+            double offsetY = 11 + (portIndex * 18) +2;
             double offsetX = port.Type == PortType.Output
             ? node.Width
             : 0;

@@ -127,6 +127,10 @@ public partial class GraphViewModel : ObservableObject
     /// </summary>
     public void StartConnection(PortViewModel port)
     {
+
+        if (port.Type == PortType.Output && Connections.Any(c => c.From == port))
+            return; // output port already has a connection
+
         System.Diagnostics.Debug.WriteLine("StartConnection fired");
         CancelPreview();
         Mouse.OverrideCursor = Cursors.Cross;
@@ -203,6 +207,10 @@ public partial class GraphViewModel : ObservableObject
     private bool CanConnect(PortViewModel from, PortViewModel to)
     {
         if (from.Type != PortType.Output || to.Type != PortType.Input)
+            return false;
+
+        // Output ports can only have one outgoing connection
+        if (Connections.Any(c => c.From == from))
             return false;
 
         var fromKind = from.ParentNode.Kind;
@@ -355,6 +363,24 @@ public partial class GraphViewModel : ObservableObject
 
     partial void OnCurrentFilePathChanged(string? value)
     {
+        OnPropertyChanged(nameof(DisplayTitle));
+    }
+
+    public void DeletePort(PortViewModel port)
+    {
+        if (port.Type == PortType.Output && port.ParentNode.OutputPorts.Count() <= 1)
+            return; // keep at least one output
+
+        var connectionsToRemove = Connections
+            .Where(c => c.From == port || c.To == port)
+            .ToList();
+
+        foreach (var connection in connectionsToRemove)
+            Connections.Remove(connection);
+
+        port.ParentNode.RemovePortPublic(port);
+
+        IsDirty = true;
         OnPropertyChanged(nameof(DisplayTitle));
     }
 }

@@ -108,7 +108,7 @@ namespace NarativeNodeGraph.Behaviors
         {
             while (obj != null)
             {
-                if (obj is TextBox || obj is PasswordBox || obj is RichTextBox)
+                if (obj is TextBox || obj is PasswordBox || obj is RichTextBox || obj is ButtonBase)
                     return true;
 
                 if (obj is FrameworkElement fe)

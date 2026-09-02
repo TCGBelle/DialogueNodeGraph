@@ -50,5 +50,11 @@ namespace NarativeNodeGraph.ViewModels
         {
             ParentNode.ParentGraph.CompleteConnection(this);
         }
+
+        [RelayCommand]
+        private void Delete()
+        {
+            ParentNode.ParentGraph.DeletePort(this);
+        }
     }
 }

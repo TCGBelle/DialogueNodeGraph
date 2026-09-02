@@ -4,10 +4,17 @@
     xmlns:vm="clr-namespace:NarativeNodeGraph.ViewModels">
 
     <DataTemplate DataType="{x:Type vm:NpcDialogueNodeViewModel}">
-        <TextBox Text="{Binding DialogueText, UpdateSourceTrigger=PropertyChanged}"
+        <StackPanel>
+            <TextBox Text="{Binding DialogueText, UpdateSourceTrigger=PropertyChanged}"
                  AcceptsReturn="True"
                  TextWrapping="Wrap"
                  Margin="5"/>
+            <Button Content="+"
+                Command="{Binding AddOutputCommand}"
+                HorizontalAlignment="Right"
+                Width="24"
+                Margin="5,0,5,5"/>
+        </StackPanel>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type vm:PlayerDialogueNodeViewModel}">

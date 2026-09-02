@@ -31,6 +31,7 @@
         <Setter Property="Width" Value="12"/>
         <Setter Property="Height" Value="12"/>
         <Setter Property="Fill" Value="#FFB347"/>
+        <Setter Property="Margin" Value="0,0,0,6"/>
         <!-- orange -->
         <Setter Property="Stroke" Value="Black"/>
         <Setter Property="StrokeThickness" Value="1"/>
