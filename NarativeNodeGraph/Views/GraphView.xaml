@@ -14,7 +14,7 @@
              av:DesignWidth="6.156">
     <UserControl.Resources>
     </UserControl.Resources>
-    <Grid>
+    <Grid Background="#1e1e1e">
         <StackPanel Orientation="Horizontal"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
@@ -25,10 +25,27 @@
                 Margin="0,0,8,0"/>
 
             <Button Content="Load"
-                Command="{Binding LoadCommand}"/>
+                Command="{Binding LoadCommand}"
+                Margin="0,0,8,0"/>
+            
+            <Button Content="Validate"
+                    Command="{Binding ValidateCommand}"
+                    Margin="0,0,8,0"/>
+            
+            <Button Content="Play"
+                    Command="{Binding PlayCommand}"
+                    Margin="0,0,8,0"/>
         </StackPanel>
-        <Canvas Background="#1e1e1e">
-        <Canvas.ContextMenu>
+        <Canvas Background="Transparent"
+                        Width="100000"
+                        Height="100000">
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}"/>
+                    <TranslateTransform X="{Binding PanX}" Y="{Binding PanY}"/>
+                </TransformGroup>
+            </Canvas.RenderTransform>
+            <Canvas.ContextMenu>
             <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                 <MenuItem Header="Add Start Node"
                   Command="{Binding AddNodeCommand}"
@@ -57,9 +74,33 @@
             <behaviors:CanvasInteractionBehavior
         MouseMoveCommand="{Binding MouseMoveOnCanvasCommand}"
         MouseUpCommand="{Binding CanvasMouseUpCommand}"
-        RightClickCommand="{Binding CanvasRightClickCommand}" />
+        RightClickCommand="{Binding CanvasRightClickCommand}" 
+                Zoom="{Binding Zoom, Mode=TwoWay}"
+                PanX="{Binding PanX, Mode=TwoWay}"
+                PanY="{Binding PanY, Mode=TwoWay}" />
         </i:Interaction.Behaviors>
-        <ItemsControl ItemsSource="{Binding Connections}">
+            <Rectangle Width="100000" Height="100000" IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <DrawingBrush TileMode="Tile"
+          Viewport="0,0,50,50"
+          ViewportUnits="Absolute">
+                        <DrawingBrush.Drawing>
+                            <GeometryDrawing>
+                                <GeometryDrawing.Pen>
+                                    <Pen Brush="#333333" Thickness="1"/>
+                                </GeometryDrawing.Pen>
+                                <GeometryDrawing.Geometry>
+                                    <GeometryGroup>
+                                        <LineGeometry StartPoint="0,0" EndPoint="50,0"/>
+                                        <LineGeometry StartPoint="0,0" EndPoint="0,50"/>
+                                    </GeometryGroup>
+                                </GeometryDrawing.Geometry>
+                            </GeometryDrawing>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <ItemsControl ItemsSource="{Binding Connections}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas/>

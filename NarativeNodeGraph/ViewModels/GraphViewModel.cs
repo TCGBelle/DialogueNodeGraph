@@ -2,11 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using NarativeNodeGraph.Models;
 using NarativeNodeGraph.Services;
+using NarativeNodeGraph.Views;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace NarativeNodeGraph.ViewModels;
 
@@ -36,6 +37,15 @@ public partial class GraphViewModel : ObservableObject
             return IsDirty ? $"{fileName} *" : fileName;
         }
     }
+
+    [ObservableProperty]
+    private double zoom = 1.0;
+
+    [ObservableProperty]
+    private double panX = -50000 + 200;
+
+    [ObservableProperty]
+    private double panY = -50000 + 200;
     public ICommand MouseMoveOnCanvasCommand { get; }
     public IRelayCommand CanvasMouseUpCommand { get; }
     public IRelayCommand<ConnectionViewModel> DeleteConnectionCommand { get; }
@@ -48,8 +58,8 @@ public partial class GraphViewModel : ObservableObject
     public GraphViewModel(IFileDialogService _fileDialogService)
     {
         fileDialogService = _fileDialogService ?? throw new ArgumentNullException(nameof(_fileDialogService));
-        var startNode = CreateNodeOfType(NodeKind.Start, 100, 100);
-        var endNode = CreateNodeOfType(NodeKind.End, 400, 200);
+        var startNode = CreateNodeOfType(NodeKind.Start, 50000, 50000);
+        var endNode = CreateNodeOfType(NodeKind.End, 50300, 50100);
 
         Nodes.Add(startNode);
         Nodes.Add(endNode);
@@ -382,6 +392,117 @@ public partial class GraphViewModel : ObservableObject
 
         IsDirty = true;
         OnPropertyChanged(nameof(DisplayTitle));
+    }
+
+    public GraphValidationResult ValidateGraph()
+    {
+        var result = new GraphValidationResult();
+
+        var startNode = Nodes.FirstOrDefault(n => n.Kind == NodeKind.Start);
+        if (startNode == null)
+        {
+            result.AddError("No Start node found.");
+            return result;
+        }
+
+        var visited = new HashSet<NodeViewModel>();
+        TraversePath(startNode, new HashSet<NodeViewModel>(), result, visited);
+
+        // Warnings: floating output ports
+        foreach (var node in Nodes)
+        {
+            foreach (var port in node.OutputPorts)
+            {
+                bool hasConnection = Connections.Any(c => c.From == port);
+                if (!hasConnection)
+                    result.AddWarning($"'{node.Title}' has an unconnected output port ('{port.Label}').");
+            }
+        }
+
+        // Warnings: orphaned nodes (unreachable from Start)
+        foreach (var node in Nodes)
+        {
+            if (node != startNode && !visited.Contains(node))
+                result.AddWarning($"'{node.Title}' is not reachable from Start.");
+        }
+
+        // Warnings: empty dialogue/answer text
+        foreach (var node in Nodes)
+        {
+            string? text = node switch
+            {
+                NpcDialogueNodeViewModel npc => npc.DialogueText,
+                PlayerDialogueNodeViewModel player => player.DialogueText,
+                AnswerNodeViewModel answer => answer.AnswerText,
+                _ => null
+            };
+
+            if (text != null && string.IsNullOrWhiteSpace(text))
+                result.AddWarning($"'{node.Title}' has empty text.");
+        }
+
+        return result;
+    }
+
+    private void TraversePath(
+        NodeViewModel node,
+        HashSet<NodeViewModel> pathVisited,
+        GraphValidationResult result,
+        HashSet<NodeViewModel> everVisited)
+    {
+        everVisited.Add(node);
+
+        if (node.Kind == NodeKind.End)
+            return; // reached an End node — this path is valid
+
+        if (pathVisited.Contains(node))
+            return; // cycle detected on this path — stop recursing, don't false-flag as dead end
+
+        pathVisited.Add(node);
+
+        var outgoing = Connections.Where(c => c.From.ParentNode == node).ToList();
+
+        if (outgoing.Count == 0)
+        {
+            result.AddError($"'{node.Title}' has no path to an End node.");
+            return;
+        }
+
+        foreach (var connection in outgoing)
+        {
+            if (connection.To != null)
+                TraversePath(connection.To.ParentNode, new HashSet<NodeViewModel>(pathVisited), result, everVisited);
+        }
+    }
+
+    [RelayCommand]
+    private void Validate()
+    {
+        var result = ValidateGraph();
+
+        if (result.Issues.Count == 0)
+        {
+            MessageBox.Show("Graph is valid — no issues found.", "Validation", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var message = string.Join("\n", result.Issues.Select(i =>
+            (i.IsError ? "[ERROR] " : "[WARNING] ") + i.Message));
+
+        var icon = result.HasErrors ? MessageBoxImage.Error : MessageBoxImage.Warning;
+
+        MessageBox.Show(message, "Validation Results", MessageBoxButton.OK, icon);
+    }
+
+    [RelayCommand]
+    private void Play()
+    {
+        var playerViewModel = new DialoguePlayerViewModel(this);
+        var window = new DialoguePlayerWindow(playerViewModel)
+        {
+            Owner = Application.Current.MainWindow
+        };
+        window.ShowDialog();
     }
 }
 

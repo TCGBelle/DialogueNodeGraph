@@ -20,6 +20,19 @@ namespace NarativeNodeGraph.Behaviors
                 typeof(DragBehavior),
                 new PropertyMetadata(null, OnDragCommandChanged));
 
+        public static readonly DependencyProperty ZoomProperty =
+    DependencyProperty.RegisterAttached(
+        "Zoom",
+        typeof(double),
+        typeof(DragBehavior),
+        new PropertyMetadata(1.0));
+
+        public static void SetZoom(UIElement element, double value) =>
+            element.SetValue(ZoomProperty, value);
+
+        public static double GetZoom(UIElement element) =>
+            (double)element.GetValue(ZoomProperty);
+
         public static void SetDragCommand(UIElement element, ICommand value) =>
             element.SetValue(DragCommandProperty, value);
 
@@ -82,15 +95,17 @@ namespace NarativeNodeGraph.Behaviors
 
         private static void OnMouseMove(object sender, MouseEventArgs e)
         {
-
             if (_isDragging && _currentElement != null && GetDragCommand(_currentElement) is ICommand cmd)
             {
                 var position = e.GetPosition(null);
                 var delta = position - _start;
                 _start = position;
 
-                if (cmd.CanExecute((delta.X, delta.Y)))
-                    cmd.Execute((delta.X, delta.Y));
+                double zoom = GetZoom(_currentElement);
+                var scaledDelta = new Vector(delta.X / zoom, delta.Y / zoom);
+
+                if (cmd.CanExecute((scaledDelta.X, scaledDelta.Y)))
+                    cmd.Execute((scaledDelta.X, scaledDelta.Y));
             }
         }
 

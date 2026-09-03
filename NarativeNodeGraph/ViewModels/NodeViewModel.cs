@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace NarativeNodeGraph.ViewModels
 {
@@ -92,8 +93,10 @@ namespace NarativeNodeGraph.ViewModels
 
         private void OnDrag((double X, double Y) delta)
         {
-            X += delta.X;
-            Y += delta.Y;
+            double currZoom = ParentGraph.Zoom;
+            Debug.WriteLine("Dragging node with delta: " + delta + " and current zoom: " + currZoom);
+            X += delta.X/currZoom;
+            Y += delta.Y/currZoom;
         }
 
         public void SetSize(double width, double height)

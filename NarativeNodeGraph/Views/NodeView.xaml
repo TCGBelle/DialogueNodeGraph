@@ -12,9 +12,9 @@
         <behaviors:NodeAutoSizeBehavior/>
         </i:Interaction.Behaviors>
         <Border Style="{StaticResource NodeBorderStyle}"
-                behaviors:DragBehavior.DragCommand ="{Binding DragCommand}"
-                Width="{Binding Width}"
-                Height="{Binding Height}">
+            behaviors:DragBehavior.DragCommand="{Binding DragCommand}"
+            Width="{Binding Width}"
+            Height="{Binding Height}">
             <Border.ContextMenu>
                 <ContextMenu
             DataContext="{Binding PlacementTarget.DataContext.ParentGraph, RelativeSource={RelativeSource Self}}">

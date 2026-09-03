@@ -1,0 +1,48 @@
+﻿<Window x:Class="NarativeNodeGraph.Views.DialoguePlayerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dialogue Preview"
+        Width="500"
+        Height="350"
+        WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Current speaker text -->
+        <TextBlock Grid.Row="0"
+                   Text="{Binding CurrentSpeakerText}"
+                   FontSize="16"
+                   TextWrapping="Wrap"
+                   VerticalAlignment="Top"/>
+
+        <!-- Choices -->
+        <StackPanel Grid.Row="1"
+                    Visibility="{Binding IsShowingChoices, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ItemsControl ItemsSource="{Binding CurrentChoices}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding AnswerText}"
+                                Margin="0,4"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding DataContext.ChooseAnswerCommand,
+                                          RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <!-- Finished message -->
+        <TextBlock Grid.Row="1"
+                   Text="— Conversation ended —"
+                   FontStyle="Italic"
+                   HorizontalAlignment="Center"
+                   Visibility="{Binding IsFinished, Converter={StaticResource BoolToVisibilityConverter}}"/>
+    </Grid>
+</Window>
