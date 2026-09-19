@@ -43,5 +43,6 @@ namespace NarativeNodeGraph.Models.Serialization
     {
         public Guid FromPortId { get; set; }
         public Guid ToPortId { get; set; }
+        public string ColourHex { get; set; } = "#FFFFFF";
     }
 }

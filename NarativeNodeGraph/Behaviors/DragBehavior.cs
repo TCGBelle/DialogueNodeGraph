@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +28,13 @@ namespace NarativeNodeGraph.Behaviors
         typeof(DragBehavior),
         new PropertyMetadata(1.0));
 
+        public static readonly DependencyProperty SelectCommandProperty =
+    DependencyProperty.RegisterAttached(
+        "SelectCommand",
+        typeof(ICommand),
+        typeof(DragBehavior),
+        new PropertyMetadata(null));
+
         public static void SetZoom(UIElement element, double value) =>
             element.SetValue(ZoomProperty, value);
 
@@ -39,6 +47,20 @@ namespace NarativeNodeGraph.Behaviors
         public static ICommand GetDragCommand(UIElement element) =>
             (ICommand)element.GetValue(DragCommandProperty);
 
+        public static void SetSelectCommand(UIElement element, ICommand value) =>
+    element.SetValue(SelectCommandProperty, value);
+
+        public static ICommand GetSelectCommand(UIElement element) =>
+            (ICommand)element.GetValue(SelectCommandProperty);
+
+        public static readonly DependencyProperty ClickCommandProperty =
+    DependencyProperty.RegisterAttached("ClickCommand", typeof(ICommand), typeof(DragBehavior),
+        new PropertyMetadata(null));
+        public static void SetClickCommand(UIElement element, ICommand value) =>
+    element.SetValue(ClickCommandProperty, value);
+        public static ICommand GetClickCommand(UIElement element) =>
+            (ICommand)element.GetValue(ClickCommandProperty);
+
         private static void OnDragCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is UIElement element)
@@ -46,12 +68,15 @@ namespace NarativeNodeGraph.Behaviors
                 element.PreviewMouseLeftButtonDown -= OnMouseDown;
                 element.PreviewMouseMove -= OnMouseMove;
                 element.PreviewMouseLeftButtonUp -= OnMouseUp;
-
+                element.PreviewMouseRightButtonDown -= OnRightMouseDown;
+                element.LostMouseCapture -= OnLostMouseCapture;
                 if (e.NewValue is ICommand)
                 {
                     element.PreviewMouseLeftButtonDown += OnMouseDown;
                     element.PreviewMouseMove += OnMouseMove;
                     element.PreviewMouseLeftButtonUp += OnMouseUp;
+                    element.PreviewMouseRightButtonDown += OnRightMouseDown;
+                    element.LostMouseCapture += OnLostMouseCapture;
                 }
             }
         }
@@ -62,6 +87,13 @@ namespace NarativeNodeGraph.Behaviors
 
         private static void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (sender is UIElement selectElement && GetSelectCommand(selectElement) is ICommand selectCmd)
+            {
+                bool ctrlHeld = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+                if (selectCmd.CanExecute(ctrlHeld))
+                    selectCmd.Execute(ctrlHeld);
+            }
+
             if (e.OriginalSource is DependencyObject source)
             {
                 if (IsInputElement(source))
@@ -85,7 +117,15 @@ namespace NarativeNodeGraph.Behaviors
 
             if (sender is UIElement element)
             {
-                _start = e.GetPosition(null);
+                element.Focus();
+                if (e.ClickCount == 2 &&
+                !Keyboard.Modifiers.HasFlag(ModifierKeys.Control) &&
+                GetClickCommand(element) is ICommand dblClick &&
+                dblClick.CanExecute(null))
+                {
+                    dblClick.Execute(null);
+                }
+                _start = e.GetPosition(Application.Current.MainWindow);
                 _currentElement = element;
                 _isDragging = true;
                 element.CaptureMouse();
@@ -95,6 +135,8 @@ namespace NarativeNodeGraph.Behaviors
 
         private static void OnMouseMove(object sender, MouseEventArgs e)
         {
+            if (e.LeftButton != MouseButtonState.Pressed)
+                return;
             if (_isDragging && _currentElement != null && GetDragCommand(_currentElement) is ICommand cmd)
             {
                 var position = e.GetPosition(null);
@@ -105,7 +147,7 @@ namespace NarativeNodeGraph.Behaviors
                 var scaledDelta = new Vector(delta.X / zoom, delta.Y / zoom);
 
                 if (cmd.CanExecute((scaledDelta.X, scaledDelta.Y)))
-                    cmd.Execute((scaledDelta.X, scaledDelta.Y));
+                cmd.Execute((scaledDelta.X, scaledDelta.Y));
             }
         }
 
@@ -139,6 +181,23 @@ namespace NarativeNodeGraph.Behaviors
             }
 
             return false;
+        }
+
+        private static void OnRightMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is UIElement element && GetSelectCommand(element) is ICommand cmd)
+            {
+                bool ctrlHeld = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+                if (cmd.CanExecute(ctrlHeld))
+                    cmd.Execute(ctrlHeld);
+            }
+            // Deliberately NOT setting e.Handled — so the ContextMenu still opens normally afterward
+        }
+
+        private static void OnLostMouseCapture(object sender, MouseEventArgs e)
+        {
+            _isDragging = false;
+            _currentElement = null;
         }
     }
 }

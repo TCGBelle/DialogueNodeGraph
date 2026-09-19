@@ -33,35 +33,42 @@ namespace NarativeNodeGraph.ViewModels
 
         private async Task Advance(NodeViewModel node)
         {
-
-            switch (node)
+            try
             {
-                case NpcDialogueNodeViewModel npc:
-                    CurrentSpeakerText = npc.DialogueText;
-                    IsShowingChoices = true;
-                    LoadChoices(npc);
-                    if (CurrentChoices.Count == 0)
-                    {
+                switch (node)
+                {
+                    case NpcDialogueNodeViewModel npc:
+                        CurrentSpeakerText = npc.DialogueText;
+                        IsShowingChoices = true;
+                        LoadChoices(npc);
+                        if (CurrentChoices.Count == 0)
+                        {
+                            await Task.Delay(1500);
+                            await AdvanceToNext(npc);
+                        }
+                        break;
+
+                    case PlayerDialogueNodeViewModel player:
+                        CurrentSpeakerText = player.DialogueText;
+                        IsShowingChoices = false;
                         await Task.Delay(1500);
-                        await AdvanceToNext(npc);
-                    }
-                    break;
+                        await AdvanceToNext(player);
+                        break;
 
-                case PlayerDialogueNodeViewModel player:
-                    CurrentSpeakerText = player.DialogueText;
-                    IsShowingChoices = false;
-                    await Task.Delay(1500);
-                    await AdvanceToNext(player);
-                    break;
+                    case var end when end.Kind == NodeKind.End:
+                        CurrentSpeakerText = "";
+                        IsFinished = true;
+                        break;
 
-                case var end when end.Kind == NodeKind.End:
-                    CurrentSpeakerText = "";
-                    IsFinished = true;
-                    break;
-
-                default:
-                    await AdvanceToNext(node);
-                    break;
+                    default:
+                        await AdvanceToNext(node);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error advancing dialogue: {ex.Message}");
+                IsFinished = true;
             }
         }
 

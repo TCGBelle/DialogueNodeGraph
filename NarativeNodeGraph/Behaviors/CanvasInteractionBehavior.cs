@@ -32,6 +32,34 @@ namespace NarativeNodeGraph.Behaviors
             DependencyProperty.Register(nameof(PanY), typeof(double), typeof(CanvasInteractionBehavior),
                 new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
+        public static readonly DependencyProperty EmptyClickCommandProperty =
+    DependencyProperty.Register(nameof(EmptyClickCommand), typeof(ICommand), typeof(CanvasInteractionBehavior));
+
+        public static readonly DependencyProperty SelectionBoxProperty =
+    DependencyProperty.Register(nameof(SelectionBox), typeof(Rect), typeof(CanvasInteractionBehavior),
+        new FrameworkPropertyMetadata(default(Rect), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public static readonly DependencyProperty IsSelectingProperty =
+            DependencyProperty.Register(nameof(IsSelecting), typeof(bool), typeof(CanvasInteractionBehavior),
+                new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public Rect SelectionBox
+        {
+            get => (Rect)GetValue(SelectionBoxProperty);
+            set => SetValue(SelectionBoxProperty, value);
+        }
+
+        public bool IsSelecting
+        {
+            get => (bool)GetValue(IsSelectingProperty);
+            set => SetValue(IsSelectingProperty, value);
+        }
+        public ICommand? EmptyClickCommand
+        {
+            get => (ICommand?)GetValue(EmptyClickCommandProperty);
+            set => SetValue(EmptyClickCommandProperty, value);
+        }
+
         public double Zoom
         {
             get => (double)GetValue(ZoomProperty);
@@ -69,11 +97,12 @@ namespace NarativeNodeGraph.Behaviors
 
         private bool _isPanning = false;
         private Point _panStart;
+        private Point _selectStart;
 
         protected override void OnAttached()
         {
             base.OnAttached();
-
+            AssociatedObject.Focusable = true;
             // GLOBAL mouse move — works even during capture
             InputManager.Current.PreProcessInput += OnPreProcessInput;
 
@@ -163,10 +192,30 @@ namespace NarativeNodeGraph.Behaviors
                 AssociatedObject.CaptureMouse();
                 e.Handled = true;
             }
+            else if (e.ChangedButton == MouseButton.Left)
+            {
+
+                if (ReferenceEquals(e.OriginalSource, AssociatedObject) &&
+                    EmptyClickCommand?.CanExecute(null) == true)
+                {
+                    AssociatedObject.Focus();
+                    EmptyClickCommand.Execute(null);
+                    _selectStart = e.GetPosition(AssociatedObject);
+                    SelectionBox = new Rect(_selectStart, _selectStart);
+                    IsSelecting = true;
+                    System.Diagnostics.Debug.WriteLine($"Box: start at {_selectStart}");
+                }
+            }
         }
 
         private void OnMouseMovePan(object sender, MouseEventArgs e)
         {
+            if (IsSelecting && e.LeftButton == MouseButtonState.Pressed)
+            {
+                var current = e.GetPosition(AssociatedObject);
+                SelectionBox = new Rect(_selectStart, current);
+
+            }
             if (_isPanning && e.MiddleButton == MouseButtonState.Pressed)
             {
                 var currentPos = e.GetPosition(null);
@@ -180,6 +229,11 @@ namespace NarativeNodeGraph.Behaviors
 
         private void OnMouseUpPan(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton == MouseButton.Left && IsSelecting)
+            {
+                IsSelecting = false;
+                System.Diagnostics.Debug.WriteLine("Box: finished");
+            }
             if (_isPanning && e.ChangedButton == MouseButton.Middle)
             {
                 _isPanning = false;

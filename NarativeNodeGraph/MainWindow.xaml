@@ -14,5 +14,8 @@
         <KeyBinding Key="O"
                 Modifiers="Control"
                 Command="{Binding LoadCommand}" />
+
+        <KeyBinding Key="Delete" 
+                    Command="{Binding DeleteSelectedCommand}" />
     </Window.InputBindings>
 </Window>

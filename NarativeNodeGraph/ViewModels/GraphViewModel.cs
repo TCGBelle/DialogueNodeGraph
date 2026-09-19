@@ -46,6 +46,12 @@ public partial class GraphViewModel : ObservableObject
 
     [ObservableProperty]
     private double panY = -50000 + 200;
+
+    [ObservableProperty]
+    private Rect selectionBox;
+
+    [ObservableProperty]
+    private bool isSelecting;
     public ICommand MouseMoveOnCanvasCommand { get; }
     public IRelayCommand CanvasMouseUpCommand { get; }
     public IRelayCommand<ConnectionViewModel> DeleteConnectionCommand { get; }
@@ -376,6 +382,21 @@ public partial class GraphViewModel : ObservableObject
         OnPropertyChanged(nameof(DisplayTitle));
     }
 
+    partial void OnSelectionBoxChanged(Rect value)
+    {
+        if (!IsSelecting)
+            return;
+
+        foreach (var node in Nodes)
+        {
+            double w = double.IsNaN(node.Width) ? node.MinWidth : node.Width;
+            double h = double.IsNaN(node.Height) ? node.MinHeight : node.Height;
+
+            var nodeRect = new Rect(node.X, node.Y, w, h);
+            node.IsSelected = value.IntersectsWith(nodeRect);
+        }
+    }
+
     public void DeletePort(PortViewModel port)
     {
         if (port.Type == PortType.Output && port.ParentNode.OutputPorts.Count() <= 1)
@@ -503,6 +524,62 @@ public partial class GraphViewModel : ObservableObject
             Owner = Application.Current.MainWindow
         };
         window.ShowDialog();
+    }
+
+    public void SelectNode(NodeViewModel node, bool ctrlHeld)
+    {
+        System.Diagnostics.Debug.WriteLine($"SelectNode called: ctrlHeld={ctrlHeld}");
+        if (!ctrlHeld)
+        {
+            if (node.IsSelected)
+                return;
+
+            foreach (var n in Nodes)
+            {
+                if (n != node)
+                    n.IsSelected = false;
+            }
+            node.IsSelected = true;
+        }
+        else
+        {
+            node.IsSelected = !node.IsSelected;
+        }
+        System.Diagnostics.Debug.WriteLine($"Node IsSelected now: {node.IsSelected}");
+    }
+
+    [RelayCommand]
+    private void ClearSelection()
+    {
+        foreach (var node in Nodes)
+            node.IsSelected = false;
+    }
+
+    [RelayCommand]
+    private void DeleteSelected()
+    {
+        var toDelete = Nodes.Where(n => n.IsSelected).ToList();
+        if (toDelete.Count == 0)
+            return;
+
+        foreach (var node in toDelete)
+            DeleteNode(node);
+    }
+
+    public void MoveSelected((double X, double Y) delta)
+    {
+        double zoom = Zoom;
+        foreach (var n in Nodes.Where(n => n.IsSelected))
+        {
+            n.X += delta.X / zoom;
+            n.Y += delta.Y / zoom;
+        }
+    }
+
+    public void SelectOnly(NodeViewModel node)
+    {
+        foreach (var n in Nodes)
+            n.IsSelected = (n == node);
     }
 }
 

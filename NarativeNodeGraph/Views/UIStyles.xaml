@@ -1,8 +1,9 @@
 ﻿<ResourceDictionary 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:NarativeNodeGraph.Converters">
+    <conv:HexToColourConverter x:Key="HexToColourConverter"/>
     <Style x:Key="ConnectionPathStyle" TargetType="Path">
-        <Setter Property="Stroke" Value="White"/>
         <Setter Property="StrokeThickness" Value="4"/>
         <Setter Property="Fill" Value="Transparent"/>
         <Setter Property="Effect">
@@ -10,19 +11,18 @@
                 <DropShadowEffect BlurRadius="0" ShadowDepth="0" Opacity="0"/>
             </Setter.Value>
         </Setter>
-
         <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True">
                 <Setter Property="StrokeThickness" Value="3"/>
                 <Setter Property="Effect">
                     <Setter.Value>
-                        <DropShadowEffect Color="White"
-                                  BlurRadius="14"
-                                  ShadowDepth="0"
-                                  Opacity="0.9"/>
+                        <DropShadowEffect Color="{Binding ColourHex, Converter={StaticResource HexToColourConverter}}"
+                                          BlurRadius="14"
+                                          ShadowDepth="0"
+                                          Opacity="0.9"/>
                     </Setter.Value>
                 </Setter>
-            </Trigger>
+            </DataTrigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="PortEllipseStyle" TargetType="Ellipse">

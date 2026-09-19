@@ -12,7 +12,11 @@
         <behaviors:NodeAutoSizeBehavior/>
         </i:Interaction.Behaviors>
         <Border Style="{StaticResource NodeBorderStyle}"
+            Focusable="True"
+            FocusVisualStyle="{x:Null}"
             behaviors:DragBehavior.DragCommand="{Binding DragCommand}"
+            behaviors:DragBehavior.SelectCommand="{Binding SelectCommand}"
+            behaviors:DragBehavior.ClickCommand="{Binding ClickCommand}"
             Width="{Binding Width}"
             Height="{Binding Height}">
             <Border.ContextMenu>

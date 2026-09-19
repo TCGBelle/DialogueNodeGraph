@@ -22,7 +22,8 @@ namespace NarativeNodeGraph.Services
                     .Select(c => new ConnectionDto
                     {
                         FromPortId = c.From.Id,
-                        ToPortId = c.To!.Id
+                        ToPortId = c.To!.Id,
+                        ColourHex = c.ColourHex
                     })
                     .ToList()
             };
@@ -59,8 +60,11 @@ namespace NarativeNodeGraph.Services
 
                 if (!portsById.TryGetValue(connectionDto.ToPortId, out var toPort))
                     continue;
-
-                connections.Add(new ConnectionViewModel(fromPort, toPort, graphViewModel.DeleteConnectionCommand));
+                var connection = new ConnectionViewModel(fromPort, toPort, graphViewModel.DeleteConnectionCommand)
+                {
+                    ColourHex = connectionDto.ColourHex
+                };
+                connections.Add(connection);
             }
 
             return new GraphLoadResult(nodes, connections);

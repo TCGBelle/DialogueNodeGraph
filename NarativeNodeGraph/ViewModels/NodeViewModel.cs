@@ -1,14 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using NarativeNodeGraph.Models;
 using CommunityToolkit.Mvvm.Input;
+using NarativeNodeGraph.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace NarativeNodeGraph.ViewModels
 {
@@ -45,7 +46,8 @@ namespace NarativeNodeGraph.ViewModels
 
         public ObservableCollection<PortViewModel> Ports { get; } = new();
         public IRelayCommand<(double X, double Y)> DragCommand { get; }
-
+        public ICommand SelectCommand { get; }
+        public ICommand ClickCommand { get; }
         public GraphViewModel ParentGraph { get; set; }
 
         public virtual object? BodyContent => null;
@@ -53,6 +55,8 @@ namespace NarativeNodeGraph.ViewModels
         {
             ParentGraph = parentGraph ?? throw new ArgumentNullException(nameof(parentGraph));
             DragCommand = new RelayCommand<(double X, double Y)>(OnDrag);
+            SelectCommand = new RelayCommand<bool>(ctrlHeld => ParentGraph.SelectNode(this, ctrlHeld));
+            ClickCommand = new RelayCommand(() => ParentGraph.SelectOnly(this));
             Ports.CollectionChanged += (_, __) => OnPropertyChanged(nameof(Ports));
         }
         public NodeViewModel(NodeModel model, GraphViewModel parentGraph)
@@ -61,9 +65,10 @@ namespace NarativeNodeGraph.ViewModels
             y = model.Y;
             title = model.Title;
             Id = model.Id;
-
-            DragCommand = new RelayCommand<(double X, double Y)>(OnDrag);
             ParentGraph = parentGraph;
+            DragCommand = new RelayCommand<(double X, double Y)>(OnDrag);
+            SelectCommand = new RelayCommand<bool>(ctrlHeld => ParentGraph.SelectNode(this, ctrlHeld));
+            ClickCommand = new RelayCommand(() => ParentGraph.SelectOnly(this));
             Ports.CollectionChanged += (_, __) => OnPropertyChanged(nameof(Ports));
         }
         protected PortViewModel AddPort(PortType type, string? label = null, Guid? fixedId = null)
@@ -93,6 +98,12 @@ namespace NarativeNodeGraph.ViewModels
 
         private void OnDrag((double X, double Y) delta)
         {
+            if (IsSelected)
+            {
+                ParentGraph.MoveSelected(delta);
+                return;
+            }
+            // this is duplicate code but it fixes a double selection bug odly where double selecting a node two diffreent ways deselcts it but not if this is here
             double currZoom = ParentGraph.Zoom;
             Debug.WriteLine("Dragging node with delta: " + delta + " and current zoom: " + currZoom);
             X += delta.X/currZoom;

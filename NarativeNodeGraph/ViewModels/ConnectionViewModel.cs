@@ -1,4 +1,5 @@
-﻿using NarativeNodeGraph.Models;
+﻿using CommunityToolkit.Mvvm.Input;
+using NarativeNodeGraph.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,7 +16,22 @@ namespace NarativeNodeGraph.ViewModels
         public PortViewModel From { get; }
         public PortViewModel? To { get; }
 
+        private string _colourHex = "#FFFFFF";
+        public string ColourHex
+        {
+            get => _colourHex;
+            set
+            {
+                if (_colourHex != value)
+                {
+                    _colourHex = value;
+                    PropertyChanged?.Invoke(this, new(nameof(ColourHex)));
+                }
+            }
+        }
+
         public ICommand? DeleteCommand { get; }
+        public ICommand SetColorCommand { get; }
         public ConnectionViewModel(PortViewModel from, PortViewModel? to)
             : this(from, to, null)
         {
@@ -26,6 +42,7 @@ namespace NarativeNodeGraph.ViewModels
             From = from;
             To = to;
             DeleteCommand = deleteCommand;
+            SetColorCommand = new RelayCommand<string>(hex => ColourHex = hex ?? "#FFFFFF");
 
             From.ParentNode.PropertyChanged += (_, __) => RaiseAll();
             if (To != null)
