@@ -10,6 +10,7 @@ namespace NarativeNodeGraph.Models.Serialization
     {
         public List<NodeDto> Nodes { get; set; } = new();
         public List<ConnectionDto> Connections { get; set; } = new();
+        public List<VariableDto> Variables { get; set; } = new();
     }
 
     public sealed class NodeDto
@@ -29,6 +30,14 @@ namespace NarativeNodeGraph.Models.Serialization
         public Dictionary<string, string> Data { get; set; } = new();
 
         public List<PortDto> Ports { get; set; } = new();
+    }
+
+    public sealed class VariableDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
     }
 
     public sealed class PortDto

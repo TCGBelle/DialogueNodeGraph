@@ -25,7 +25,14 @@ namespace NarativeNodeGraph.Services
                         ToPortId = c.To!.Id,
                         ColourHex = c.ColourHex
                     })
-                    .ToList()
+                    .ToList(),
+                Variables = graphViewModel.Blackboard.Variables.Select(v => new VariableDto
+                {
+                    Id = v.Id,
+                    Name = v.Name,
+                    Type = v.Type.ToString(),
+                    Value = v.Value
+                }).ToList()
             };
         }
 
@@ -65,6 +72,19 @@ namespace NarativeNodeGraph.Services
                     ColourHex = connectionDto.ColourHex
                 };
                 connections.Add(connection);
+            }
+
+            graphViewModel.Blackboard.Variables.Clear();
+            foreach (var variableDto in dto.Variables)
+            {
+                if (!Enum.TryParse<VariableType>(variableDto.Type, ignoreCase: true, out var type))
+                    continue;
+
+                var variable = new VariableViewModel(
+                    new VariableModel { Id = variableDto.Id, Name = variableDto.Name, Type = type, Value = variableDto.Value },
+                    graphViewModel.Blackboard);
+
+                graphViewModel.Blackboard.Variables.Add(variable);
             }
 
             return new GraphLoadResult(nodes, connections);

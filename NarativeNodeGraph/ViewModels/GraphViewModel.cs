@@ -15,7 +15,7 @@ public partial class GraphViewModel : ObservableObject
 {
     public ObservableCollection<NodeViewModel> Nodes { get; } = new();
     public ObservableCollection<ConnectionViewModel> Connections { get; } = new();
-
+    public BlackboardViewModel Blackboard { get; } = new();
     private PortViewModel? activePort;
     private ConnectionViewModel? previewConnection;
     private Point lastContextMenuPosition;
