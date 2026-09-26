@@ -7,7 +7,7 @@ This project demonstrates several concepts used in developer tooling and complex
 • Extensible UI components for complex workflows
 
 ## Demo
-https://www.youtube.com/watch?v=jcrjpV-NOL4&t=7s
+https://www.youtube.com/watch?v=OPXdRAM638I
 
 ## Architecture
 
