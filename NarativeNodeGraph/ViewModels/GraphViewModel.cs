@@ -581,5 +581,60 @@ public partial class GraphViewModel : ObservableObject
         foreach (var n in Nodes)
             n.IsSelected = (n == node);
     }
+
+    [ObservableProperty]
+    private BlackboardPanelState blackboardState = BlackboardPanelState.Docked;
+
+    public double BlackboardColumnWidth => BlackboardState == BlackboardPanelState.Docked ? 250 : 28;
+
+    public bool IsBlackboardContentVisible => BlackboardState == BlackboardPanelState.Docked;
+
+    public string BlackboardToggleIcon => BlackboardState switch
+    {
+        BlackboardPanelState.Docked => "⤡",
+        _ => "⤢"
+    };
+    public GridLength BlackboardContentRowHeight =>
+    BlackboardState == BlackboardPanelState.Docked ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+    private BlackboardWindow? _blackboardWindow;
+    [RelayCommand]
+    private void CycleBlackboardPanel()
+    {
+        switch (BlackboardState)
+        {
+            case BlackboardPanelState.Docked:
+                BlackboardState = BlackboardPanelState.Collapsed;
+                break;
+
+            case BlackboardPanelState.Collapsed:
+                BlackboardState = BlackboardPanelState.PoppedOut;
+                OpenBlackboardWindow();
+                break;
+
+            case BlackboardPanelState.PoppedOut:
+                _blackboardWindow?.Close();
+                BlackboardState = BlackboardPanelState.Docked;
+                break;
+        }
+    }
+
+    private void OpenBlackboardWindow()
+    {
+        _blackboardWindow = new BlackboardWindow { DataContext = this };
+        _blackboardWindow.Closed += (_, _) =>
+        {
+            _blackboardWindow = null;
+            if (BlackboardState == BlackboardPanelState.PoppedOut)
+                BlackboardState = BlackboardPanelState.Collapsed;
+        };
+        _blackboardWindow.Show();
+    }
+    partial void OnBlackboardStateChanged(BlackboardPanelState value)
+    {
+        OnPropertyChanged(nameof(BlackboardColumnWidth));
+        OnPropertyChanged(nameof(IsBlackboardContentVisible));
+        OnPropertyChanged(nameof(BlackboardToggleIcon));
+        OnPropertyChanged(nameof(BlackboardContentRowHeight));
+    }
 }
 

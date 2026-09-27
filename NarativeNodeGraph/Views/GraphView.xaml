@@ -16,6 +16,10 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
     <Grid Background="#1e1e1e">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="{Binding BlackboardColumnWidth}"/>
+        </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
@@ -195,5 +199,25 @@
                    StrokeThickness="1"
                    IsHitTestVisible="False"/>
         </Canvas>
+        <Border Grid.Column="1" Background="#252526" BorderBrush="#3F3F46" BorderThickness="1,0,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="{Binding BlackboardContentRowHeight}"/>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Row="0"
+                Content="{Binding BlackboardToggleIcon}"
+                Command="{Binding CycleBlackboardPanelCommand}"
+                HorizontalAlignment="Right"
+                Width="24" Height="24"
+                FontSize="14"
+                Margin="4"/>
+
+                <local:BlackboardView Grid.Row="1"
+                              DataContext="{Binding Blackboard}"
+                              ClipToBounds="True"/>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

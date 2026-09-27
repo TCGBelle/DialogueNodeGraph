@@ -15,13 +15,62 @@ namespace NarativeNodeGraph.ViewModels
         [ObservableProperty]
         private VariableType type = VariableType.Bool;
 
+        private string rawValue = "false";
+        public string Value
+        {
+            get => rawValue;
+            set
+            {
+                if (rawValue == value)
+                    return;
+
+                if (Type == VariableType.Int && !int.TryParse(value, out _))
+                {
+                    ValueError = "Enter a whole number.";
+                    OnPropertyChanged(nameof(Value));   // box snaps back to the old value
+                    return;
+                }
+
+                ValueError = null;
+                rawValue = value;
+                OnPropertyChanged(nameof(Value));
+            }
+        }
+
         [ObservableProperty]
-        private string value = "false";
+        private string? valueError;
+
+        public bool HasValueError => !string.IsNullOrEmpty(ValueError);
+
+        partial void OnValueErrorChanged(string? value) => OnPropertyChanged(nameof(HasValueError));
+
+        public bool BoolValue
+        {
+            get => Value == "true";
+            set => Value = value ? "true" : "false";
+        }
+
+        public bool IsBoolType => Type == VariableType.Bool;
+        public bool IsIntType => Type == VariableType.Int;
 
         [ObservableProperty]
         private string? nameError;
 
         private string name = "NewVariable";
+
+        partial void OnTypeChanged(VariableType value)
+        {
+            Value = value switch
+            {
+                VariableType.Bool => "false",
+                VariableType.Int => "0",
+                _ => Value
+            };
+
+            OnPropertyChanged(nameof(IsBoolType));
+            OnPropertyChanged(nameof(IsIntType));
+            OnPropertyChanged(nameof(BoolValue));
+        }
         public string Name
         {
             get => name;
@@ -42,7 +91,7 @@ namespace NarativeNodeGraph.ViewModels
                 OnPropertyChanged(nameof(Name));
             }
         }
-
+        public Array AvailableTypes => Enum.GetValues(typeof(VariableType));
         public BlackboardViewModel ParentBlackboard { get; set; }
 
         public VariableViewModel(BlackboardViewModel parentBlackboard)
@@ -55,7 +104,7 @@ namespace NarativeNodeGraph.ViewModels
             Id = model.Id;
             name = model.Name;
             type = model.Type;
-            value = model.Value;
+            Value = model.Value;
             ParentBlackboard = parentBlackboard;
         }
     }

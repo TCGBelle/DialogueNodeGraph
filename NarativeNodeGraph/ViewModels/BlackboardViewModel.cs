@@ -35,5 +35,11 @@ namespace NarativeNodeGraph.ViewModels
         {
             return Variables.Any(v => v != excluding && v.Name == name);
         }
+
+        [RelayCommand]
+        private void DeleteVariable(VariableViewModel variable)
+        {
+            Variables.Remove(variable);
+        }
     }
 }
